@@ -80,11 +80,11 @@ h1{font-size:2.6rem;margin-bottom:20px}
 <div id="moneyDisplay">$0</div>
 <div class="container">
 <h1>Reverse Rock Paper Scissors</h1>
-<div id="computerChoice" class="choice" onclick="quickPlay()">?</div>
+<div id="computerChoice" class="choice">?</div>
 <div class="buttons">
-<button onclick="guess('rock')">✊ Rock</button>
-<button onclick="guess('paper')">✋ Paper</button>
-<button onclick="guess('scissors')">✌️ Scissors</button>
+<button id="rockBtn">✊ Rock</button>
+<button id="paperBtn">✋ Paper</button>
+<button id="scissorsBtn">✌️ Scissors</button>
 </div>
 
 <div class="stats">
@@ -98,24 +98,24 @@ h1{font-size:2.6rem;margin-bottom:20px}
 <div class="stat"><small>PETS</small><span id="petCount">0</span></div>
 </div>
 
-<button id="cashoutBtn" onclick="cashOut()">💰 Cash Out</button>
+<button id="cashoutBtn">💰 Cash Out</button>
 </div>
 
-<button id="settingsBtn" class="fixed" onclick="openModal('settings')">Rebirth</button>
-<button id="techBtn" class="fixed" onclick="openModal('tech')">Tech Tree</button>
-<button id="statsBtn" class="fixed" onclick="openModal('stats')">Stats</button>
+<button id="settingsBtn" class="fixed">Rebirth</button>
+<button id="techBtn" class="fixed">Tech Tree</button>
+<button id="statsBtn" class="fixed">Stats</button>
 
 <div id="settings" class="modal"><div class="modal-box">
 <h2>⚙️ Settings & Rebirth</h2>
 <h3>Appearance Mode</h3>
 <div class="settings-grid">
-<button onclick="setMode(0)">Emoji Mode</button>
-<button onclick="setMode(1)">Text Mode</button>
-<button onclick="setMode(2)">Objects Mode</button>
+<button id="mode0Btn">Emoji Mode</button>
+<button id="mode1Btn">Text Mode</button>
+<button id="mode2Btn">Objects Mode</button>
 </div>
 <h3 style="margin-top:20px">Options</h3>
 <label class="checkbox">
-<input type="checkbox" id="autoCollectToggle" onchange="toggleAutoCollect()">
+<input type="checkbox" id="autoCollectToggle">
 <span>Enable Auto-Collection</span>
 </label>
 <h3 style="margin-top:20px;color:#f59e0b">Rebirth System</h3>
@@ -124,66 +124,25 @@ h1{font-size:2.6rem;margin-bottom:20px}
 <div style="color:#22c55e;font-weight:800;margin-bottom:8px">Current Rebirth Bonus: +<span id="rebirthBonus">0</span>%</div>
 <div style="color:#8b5cf6">Next Rebirth Requires: $<span id="rebirthReq">1000000</span></div>
 </div>
-<button onclick="doRebirth()" style="width:100%;padding:16px;border:none;border-radius:12px;background:linear-gradient(135deg,#f59e0b,#dc2626);color:white;font-weight:800;cursor:pointer;font-size:16px">🔄 REBIRTH</button>
-<button class="close" onclick="closeModal('settings')">Close</button>
+<button id="rebirthBtn" style="width:100%;padding:16px;border:none;border-radius:12px;background:linear-gradient(135deg,#f59e0b,#dc2626);color:white;font-weight:800;cursor:pointer;font-size:16px">🔄 REBIRTH</button>
+<button class="close" id="closeSettings">Close</button>
 </div></div>
 
 <div id="tech" class="modal"><div class="modal-box">
 <h2>🏪 Tech Tree</h2>
 <h3 style="color:#3b82f6">Backgrounds</h3>
-<div class="buildings-grid" style="margin-bottom:20px">
-<div class="building" onclick="selectBg(0)">
-<div class="building-icon">🌌</div>
-<div class="building-info">
-<div class="building-header"><span class="building-name">Default Space</span></div>
-<div class="building-desc">Classic dark space theme</div>
-<div class="building-stats"><span class="building-cost">FREE</span></div>
-</div>
-</div>
-<div class="building" onclick="buyBg(1)" id="bg1">
-<div class="building-icon">🌊</div>
-<div class="building-info">
-<div class="building-header"><span class="building-name">Ocean Depths</span></div>
-<div class="building-desc">Deep blue underwater vibes</div>
-<div class="building-stats"><span class="building-cost">$500K</span></div>
-</div>
-</div>
-<div class="building" onclick="buyBg(2)" id="bg2">
-<div class="building-icon">🌅</div>
-<div class="building-info">
-<div class="building-header"><span class="building-name">Sunset Sky</span></div>
-<div class="building-desc">Warm orange and red gradients</div>
-<div class="building-stats"><span class="building-cost">$1M</span></div>
-</div>
-</div>
-<div class="building" onclick="buyBg(3)" id="bg3">
-<div class="building-icon">🌲</div>
-<div class="building-info">
-<div class="building-header"><span class="building-name">Forest Grove</span></div>
-<div class="building-desc">Peaceful green nature</div>
-<div class="building-stats"><span class="building-cost">$2M</span></div>
-</div>
-</div>
-<div class="building" onclick="buyBg(4)" id="bg4">
-<div class="building-icon">💫</div>
-<div class="building-info">
-<div class="building-header"><span class="building-name">Neon City</span></div>
-<div class="building-desc">Cyberpunk pink and purple</div>
-<div class="building-stats"><span class="building-cost">$5M</span></div>
-</div>
-</div>
-</div>
+<div class="buildings-grid" style="margin-bottom:20px" id="backgroundsContainer"></div>
 <h3 style="color:#22c55e">Buildings</h3>
 <div id="buildingsContainer" class="buildings-grid"></div>
 <h3 style="color:#8b5cf6">Upgrades</h3>
 <div id="upgradesContainer" class="upgrades-container"></div>
-<button class="close" onclick="closeModal('tech')">Close</button>
+<button class="close" id="closeTech">Close</button>
 </div></div>
 
 <div id="stats" class="modal"><div class="modal-box">
 <h2>📊 Stats</h2>
 <div id="statsContent"></div>
-<button class="close" onclick="closeModal('stats')">Close</button>
+<button class="close" id="closeStats">Close</button>
 </div></div>
 
 <div id="tooltip" class="tooltip">
@@ -244,12 +203,12 @@ const petTypes=[
   {id:9,emoji:'🐺',name:'Wolf'}
 ];
 
-const backgrounds=[
-  {id:0,name:'Default Space',class:''},
-  {id:1,name:'Ocean Depths',class:'bg-ocean',cost:500000},
-  {id:2,name:'Sunset Sky',class:'bg-sunset',cost:1000000},
-  {id:3,name:'Forest Grove',class:'bg-forest',cost:2000000},
-  {id:4,name:'Neon City',class:'bg-neon',cost:5000000}
+const backgroundsData=[
+  {id:0,name:'Default Space',icon:'🌌',class:'',desc:'Classic dark space theme'},
+  {id:1,name:'Ocean Depths',icon:'🌊',class:'bg-ocean',cost:500000,desc:'Deep blue underwater vibes'},
+  {id:2,name:'Sunset Sky',icon:'🌅',class:'bg-sunset',cost:1000000,desc:'Warm orange and red gradients'},
+  {id:3,name:'Forest Grove',icon:'🌲',class:'bg-forest',cost:2000000,desc:'Peaceful green nature'},
+  {id:4,name:'Neon City',icon:'💫',class:'bg-neon',cost:5000000,desc:'Cyberpunk pink and purple'}
 ];
 
 let mode=+localStorage.getItem('mode')||0;
@@ -349,17 +308,6 @@ function update(){
   setTimeout(()=>m.classList.remove('money-pop'),200);
   
   document.getElementById('cashoutBtn').disabled=streak<1;
-  
-  for(let i=1;i<=4;i++){
-    const elem=document.getElementById('bg'+i);
-    if(elem){
-      if(ownedBackgrounds.includes(i)){
-        elem.classList.remove('disabled');
-      }else{
-        elem.classList.add('disabled');
-      }
-    }
-  }
 }
 
 function formatNum(n){
@@ -460,7 +408,7 @@ function cashOut(isAuto){
   streak=0;
   localStorage.setItem('money',money);
   localStorage.setItem('stats',JSON.stringify(stats));
-  spawnParticle((isAuto?'🤖 AUTO: ':'')+'++formatNum(gain));
+  spawnParticle((isAuto?'🤖 AUTO: ':'')+'+$'+formatNum(gain));
   update();
 }
 
@@ -482,7 +430,7 @@ function openModal(id){
     document.getElementById('statsContent').innerHTML=`
       <div style="color:#94a3b8;line-height:2.2;font-size:16px">
         Best Streak: <strong style="color:#22c55e">${stats.best}</strong><br>
-        Total Earned: <strong style="color:#fbbf24">${formatNum(stats.earned)}</strong><br>
+        Total Earned: <strong style="color:#fbbf24">$${formatNum(stats.earned)}</strong><br>
         Manual Clicks: <strong style="color:#3b82f6">${stats.clicks}</strong><br>
         Buildings Owned: <strong style="color:#8b5cf6">${Object.values(owned).reduce((a,b)=>a+b,0)}</strong><br>
         Rebirths: <strong style="color:#f59e0b">${rebirths}</strong><br>
@@ -493,6 +441,7 @@ function openModal(id){
   if(id==='tech'){
     renderBuildings();
     renderUpgrades();
+    renderBackgrounds();
   }
   if(id==='settings'){
     document.getElementById('rebirthBonus').textContent=(rebirths*10);
@@ -505,291 +454,4 @@ function closeModal(id){
   document.getElementById(id).style.display='none';
 }
 
-function setMode(m){
-  mode=m;
-  localStorage.setItem('mode',m);
-  closeModal('settings');
-}
-
-function buyBuilding(b){
-  const cost=getCost(b);
-  if(money<cost)return;
-  money-=cost;
-  owned[b.id]++;
-  localStorage.setItem('money',money);
-  localStorage.setItem('owned',JSON.stringify(owned));
-  update();
-  renderBuildings();
-  renderUpgrades();
-}
-
-function buyUpgrade(u){
-  if(money<u.cost)return;
-  if(boughtUpgrades[u.id])return;
-  
-  if(u.requires){
-    for(let key in u.requires){
-      if(!boughtUpgrades[key])return;
-    }
-  }
-  
-  money-=u.cost;
-  boughtUpgrades[u.id]=true;
-  
-  if(u.effect&&u.effect.streakProtect){
-    streakProtectCharges+=u.effect.streakProtect;
-  }
-  
-  localStorage.setItem('money',money);
-  localStorage.setItem('upgrades',JSON.stringify(boughtUpgrades));
-  update();
-  renderBuildings();
-  renderUpgrades();
-}
-
-function renderBuildings(){
-  document.getElementById('buildingsContainer').innerHTML=buildings.map(b=>{
-    const cost=getCost(b);
-    const canBuy=money>=cost;
-    
-    let extraInfo='';
-    if(b.isBot){
-      extraInfo=`<span class="building-production">plays ${b.speed||1}/s</span>`;
-    }else if(b.isCollector){
-      extraInfo=`<span class="building-production">+${b.threshold} to threshold</span>`;
-    }else if(b.isLuck){
-      extraInfo=`<span class="building-production">+${b.luck}% luck</span>`;
-    }
-    
-    return `
-      <div class="building ${!canBuy?'disabled':''}" onclick="buyBuilding(buildings[${buildings.indexOf(b)}])">
-        <div class="building-icon">${b.icon}</div>
-        <div class="building-info">
-          <div class="building-header">
-            <span class="building-name">${b.name}</span>
-            <span class="building-owned">${owned[b.id]}</span>
-          </div>
-          <div class="building-desc">${b.desc}</div>
-          <div class="building-stats">
-            <span class="building-cost">${formatNum(cost)}</span>
-            ${extraInfo}
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function renderUpgrades(){
-  document.getElementById('upgradesContainer').innerHTML=upgrades.map(u=>{
-    const canBuy=money>=u.cost;
-    const isPurchased=boughtUpgrades[u.id];
-    let meetsReq=true;
-    
-    if(u.requires){
-      for(let key in u.requires){
-        if(!boughtUpgrades[key])meetsReq=false;
-      }
-    }
-    
-    const disabled=!canBuy||!meetsReq;
-    
-    return `
-      <div class="upgrade ${disabled?'disabled':''} ${isPurchased?'purchased':''}" 
-           onclick="buyUpgrade(upgrades.find(x=>x.id==='${u.id}'))"
-           onmouseenter="showTooltip(event,upgrades.find(x=>x.id==='${u.id}'))"
-           onmouseleave="hideTooltip()">
-        <div class="upgrade-icon">${u.icon}</div>
-        <div class="upgrade-cost">${formatNum(u.cost)}</div>
-      </div>
-    `;
-  }).join('');
-}
-
-function showTooltip(e,u){
-  const tt=document.getElementById('tooltip');
-  tt.querySelector('.tooltip-title').textContent=u.name;
-  tt.querySelector('.tooltip-desc').textContent=u.desc;
-  tt.querySelector('.tooltip-cost').textContent='Cost: +formatNum(u.cost);
-  tt.classList.add('show');
-  
-  const rect=e.target.closest('.upgrade').getBoundingClientRect();
-  tt.style.left=rect.right+10+'px';
-  tt.style.top=rect.top+'px';
-}
-
-function hideTooltip(){
-  document.getElementById('tooltip').classList.remove('show');
-}
-
-function doRebirth(){
-  const req=1000000*Math.pow(10,rebirths);
-  if(money<req){
-    alert('Not enough money! Need: +formatNum(req));
-    return;
-  }
-  
-  if(!confirm('Reset ALL progress for +10% permanent production bonus and a new pet?')){
-    return;
-  }
-  
-  rebirths++;
-  
-  const newPetType=petTypes[rebirths%petTypes.length];
-  const newPet={
-    type:newPetType.id,
-    emoji:newPetType.emoji,
-    x:Math.random()*80+10,
-    y:Math.random()*60+20,
-    vx:(Math.random()-0.5)*2,
-    vy:(Math.random()-0.5)*2
-  };
-  pets.push(newPet);
-  
-  money=0;
-  streak=0;
-  streakProtectCharges=0;
-  owned={};
-  boughtUpgrades={};
-  buildings.forEach(b=>owned[b.id]=0);
-  
-  localStorage.setItem('rebirths',rebirths);
-  localStorage.setItem('pets',JSON.stringify(pets));
-  localStorage.setItem('money',money);
-  localStorage.setItem('owned',JSON.stringify(owned));
-  localStorage.setItem('upgrades',JSON.stringify(boughtUpgrades));
-  
-  closeModal('settings');
-  update();
-  renderPets();
-  spawnParticle('🔄 REBIRTH! +10% PRODUCTION');
-}
-
-function toggleAutoCollect(){
-  autoCollectEnabled=document.getElementById('autoCollectToggle').checked;
-  localStorage.setItem('autoCollect',autoCollectEnabled);
-}
-
-function buyBg(id){
-  if(ownedBackgrounds.includes(id)){
-    selectBg(id);
-    return;
-  }
-  
-  const bg=backgrounds[id];
-  if(!bg||!bg.cost)return;
-  
-  if(money<bg.cost){
-    alert('Not enough money!');
-    return;
-  }
-  
-  money-=bg.cost;
-  ownedBackgrounds.push(id);
-  localStorage.setItem('money',money);
-  localStorage.setItem('ownedBg',JSON.stringify(ownedBackgrounds));
-  selectBg(id);
-  update();
-}
-
-function selectBg(id){
-  if(!ownedBackgrounds.includes(id))return;
-  currentBg=id;
-  localStorage.setItem('currentBg',id);
-  
-  document.body.className='';
-  const bg=backgrounds[id];
-  if(bg&&bg.class){
-    document.body.classList.add(bg.class);
-  }
-}
-
-function shootLaser(){
-  const laser=document.createElement('div');
-  laser.className='laser';
-  
-  const btn=document.querySelector('.buttons');
-  const rect=btn.getBoundingClientRect();
-  const choice=document.getElementById('computerChoice');
-  const targetRect=choice.getBoundingClientRect();
-  
-  laser.style.left=rect.left+rect.width/2+'px';
-  laser.style.top=rect.top+rect.height/2+'px';
-  
-  const dx=targetRect.left-rect.left;
-  const dy=targetRect.top-rect.top;
-  const angle=Math.atan2(dy,dx);
-  const length=Math.sqrt(dx*dx+dy*dy);
-  
-  laser.style.transform=`rotate(${angle}rad)`;
-  laser.style.setProperty('--laser-length',length+'px');
-  
-  document.body.appendChild(laser);
-  setTimeout(()=>laser.remove(),400);
-}
-
-function renderPets(){
-  document.querySelectorAll('.pet').forEach(p=>p.remove());
-  
-  pets.forEach(pet=>{
-    const elem=document.createElement('div');
-    elem.className='pet';
-    elem.textContent=pet.emoji;
-    elem.style.left=pet.x+'%';
-    elem.style.top=pet.y+'%';
-    document.body.appendChild(elem);
-  });
-}
-
-function updatePets(){
-  pets.forEach((pet,i)=>{
-    pet.x+=pet.vx*0.1;
-    pet.y+=pet.vy*0.1;
-    
-    if(pet.x<0||pet.x>95){
-      pet.vx*=-1;
-      pet.x=Math.max(0,Math.min(95,pet.x));
-    }
-    if(pet.y<10||pet.y>85){
-      pet.vy*=-1;
-      pet.y=Math.max(10,Math.min(85,pet.y));
-    }
-    
-    const elem=document.querySelectorAll('.pet')[i];
-    if(elem){
-      elem.style.left=pet.x+'%';
-      elem.style.top=pet.y+'%';
-    }
-  });
-  
-  if(Math.random()<0.02){
-    pets.forEach(pet=>{
-      pet.vx+=(Math.random()-0.5)*0.5;
-      pet.vy+=(Math.random()-0.5)*0.5;
-      pet.vx=Math.max(-2,Math.min(2,pet.vx));
-      pet.vy=Math.max(-2,Math.min(2,pet.vy));
-    });
-  }
-}
-
-setInterval(()=>{
-  const pps=calcPlaysPerSecond();
-  if(pps>0){
-    const playsThisTick=Math.min(pps/10,100);
-    for(let i=0;i<playsThisTick;i++){
-      const move=choices[Math.floor(Math.random()*3)];
-      processGame(move,true);
-    }
-    update();
-  }
-},100);
-
-setInterval(updatePets,50);
-
-selectBg(currentBg);
-renderPets();
-update();
-</script>
-
-</body>
-</html>
+function
