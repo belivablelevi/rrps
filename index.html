@@ -5,47 +5,23 @@
 <title>RPS Incremental Clicker</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
-
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{
-  font-family:'Inter',sans-serif;
-  background:radial-gradient(circle at top,#020617,#000);
-  color:#fff;
-  min-height:100vh;
-  overflow-x:hidden;
-  transition:background 0.5s;
-}
-#moneyDisplay{
-  position:fixed;top:16px;right:16px;background:linear-gradient(135deg,#10b981,#22c55e);
-  padding:14px 26px;border-radius:999px;font-weight:900;font-size:20px;color:#022c22;
-  box-shadow:0 12px 30px rgba(16,185,129,.6);z-index:10;transition:transform .25s;
-}
+body{font-family:'Inter',sans-serif;background:radial-gradient(circle at top,#020617,#000);color:#fff;min-height:100vh;overflow-x:hidden;transition:background 0.5s;}
+#moneyDisplay{position:fixed;top:16px;right:16px;background:linear-gradient(135deg,#10b981,#22c55e);padding:14px 26px;border-radius:999px;font-weight:900;font-size:20px;color:#022c22;box-shadow:0 12px 30px rgba(16,185,129,.6);z-index:10;transition:transform .25s;}
 .money-pop{transform:scale(1.15);}
-.container{
-  max-width:900px;margin:120px auto;background:#020617cc;backdrop-filter:blur(12px);
-  padding:36px;border-radius:30px;text-align:center;box-shadow:0 50px 120px rgba(0,0,0,.6);
-  position:relative;z-index:5;isolation:isolate;
-}
+.container{max-width:900px;margin:120px auto;background:#020617cc;backdrop-filter:blur(12px);padding:36px;border-radius:30px;text-align:center;box-shadow:0 50px 120px rgba(0,0,0,.6);position:relative;z-index:5;isolation:isolate;}
 h1{font-size:2.6rem;margin-bottom:20px}
 .choice{font-size:96px;margin:26px 0;cursor:pointer;user-select:none;position:relative;z-index:6;}
 .buttons{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:relative;z-index:10;}
-.buttons button{
-  min-width:170px;padding:18px;font-size:18px;font-weight:800;border:none;
-  border-radius:20px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;
-  cursor:pointer;transition:.2s;position:relative;z-index:10;
-}
+.buttons button{min-width:170px;padding:18px;font-size:18px;font-weight:800;border:none;border-radius:20px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;cursor:pointer;transition:.2s;position:relative;z-index:10;}
 .buttons button:hover{transform:translateY(-3px) scale(1.06);box-shadow:0 20px 40px rgba(34,197,94,.6);}
 .buttons button:active{transform:translateY(-1px) scale(1.02);}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:18px;margin:32px 0;position:relative;z-index:6;}
 .stat{background:#020617;border:1px solid #1e293b;padding:18px;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;z-index:6;}
 .stat small{color:#94a3b8;font-size:12px;letter-spacing:.08em;margin-bottom:6px;}
 .stat span{font-size:28px;font-weight:900;line-height:1;}
-#cashoutBtn{
-  padding:18px 44px;font-size:20px;font-weight:900;border:none;border-radius:999px;
-  background:linear-gradient(135deg,#f59e0b,#facc15);color:#422006;cursor:pointer;transition:.2s;
-  position:relative;z-index:10;
-}
+#cashoutBtn{padding:18px 44px;font-size:20px;font-weight:900;border:none;border-radius:999px;background:linear-gradient(135deg,#f59e0b,#facc15);color:#422006;cursor:pointer;transition:.2s;position:relative;z-index:10;}
 #cashoutBtn:hover{transform:scale(1.08)}
 #cashoutBtn:disabled{opacity:.4;cursor:not-allowed}
 .fixed{position:fixed;bottom:20px;padding:14px 24px;border:none;border-radius:999px;font-weight:800;cursor:pointer;color:white;z-index:20;}
@@ -74,21 +50,14 @@ h1{font-size:2.6rem;margin-bottom:20px}
 .building-cost{font-size:18px;font-weight:900;color:#fbbf24;}
 .building-production{color:#64748b;font-size:13px;}
 .upgrades-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:10px;margin-bottom:20px;}
-.upgrade{
-  aspect-ratio:1;background:linear-gradient(135deg,#1e1b4b,#312e81);border:3px solid #4c1d95;
-  border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  cursor:pointer;transition:.2s;position:relative;padding:8px;
-}
+.upgrade{aspect-ratio:1;background:linear-gradient(135deg,#1e1b4b,#312e81);border:3px solid #4c1d95;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:.2s;position:relative;padding:8px;}
 .upgrade:hover:not(.disabled){border-color:#8b5cf6;transform:scale(1.05);box-shadow:0 10px 30px rgba(139,92,246,.5);}
 .upgrade.disabled{opacity:.25;cursor:not-allowed;}
 .upgrade.purchased{opacity:.4;border-color:#10b981;cursor:default;}
 .upgrade.purchased::after{content:'✓';position:absolute;top:4px;right:4px;color:#10b981;font-size:16px;font-weight:900;}
 .upgrade-icon{font-size:32px;margin-bottom:4px;}
 .upgrade-cost{font-size:11px;font-weight:800;color:#fbbf24;}
-.tooltip{
-  position:fixed;background:#0f172a;border:2px solid #22c55e;border-radius:12px;padding:12px 16px;
-  pointer-events:none;z-index:100;max-width:300px;box-shadow:0 10px 40px rgba(0,0,0,.8);display:none;
-}
+.tooltip{position:fixed;background:#0f172a;border:2px solid #22c55e;border-radius:12px;padding:12px 16px;pointer-events:none;z-index:100;max-width:300px;box-shadow:0 10px 40px rgba(0,0,0,.8);display:none;}
 .tooltip.show{display:block}
 .tooltip-title{font-size:16px;font-weight:800;color:#22c55e;margin-bottom:6px;}
 .tooltip-desc{color:#94a3b8;font-size:13px;line-height:1.4;margin-bottom:8px;}
@@ -98,7 +67,6 @@ h1{font-size:2.6rem;margin-bottom:20px}
 .pet{position:fixed;font-size:32px;pointer-events:none;z-index:4;transition:transform 0.3s;}
 .laser{position:fixed;height:4px;background:linear-gradient(90deg,#ef4444,#f59e0b,#22c55e);pointer-events:none;z-index:3;animation:laser-shoot 0.4s ease forwards;transform-origin:left center;box-shadow:0 0 20px #ef4444;}
 @keyframes laser-shoot{0%{width:0;opacity:1}100%{width:var(--laser-length);opacity:0}}
-.bg-space{background:radial-gradient(circle at 30% 50%,#1e1b4b,#0c0a1f);}
 .bg-ocean{background:linear-gradient(180deg,#0e7490,#06b6d4,#164e63);}
 .bg-sunset{background:linear-gradient(180deg,#7c2d12,#ea580c,#fb923c);}
 .bg-forest{background:linear-gradient(180deg,#14532d,#166534,#15803d);}
@@ -225,12 +193,12 @@ h1{font-size:2.6rem;margin-bottom:20px}
 </div>
 
 <script>
-const choices=['rock','paper','scissors']
+const choices=['rock','paper','scissors'];
 const displaySets=[
   {rock:'✊',paper:'✋',scissors:'✌️'},
   {rock:'Rock',paper:'Paper',scissors:'Scissors'},
   {rock:'🪨',paper:'📄',scissors:'✂️'}
-]
+];
 
 const buildings=[
   {id:'bot',name:'Practice Bot',icon:'🤖',baseCost:15,desc:'Plays 1 game per second',isBot:true,speed:1},
@@ -241,32 +209,27 @@ const buildings=[
   {id:'mine',name:'Casino Floor',icon:'🎰',baseCost:12000,desc:'Plays 47 games per second',isBot:true,speed:47},
   {id:'foot',name:'Rabbit Foot',icon:'🐾',baseCost:20000,desc:'Adds 5% win chance',isLuck:true,luck:5},
   {id:'factory',name:'Bot Swarm',icon:'🏭',baseCost:130000,desc:'Plays 260 games per second',isBot:true,speed:260},
-  {id:'clover',name:'Four-Leaf Clover',icon:'🍀',baseCost:2000000,desc:'Adds 10% win chance',isLuck:true,luck:10},
-]
+  {id:'clover',name:'Four-Leaf Clover',icon:'🍀',baseCost:2000000,desc:'Adds 10% win chance',isLuck:true,luck:10}
+];
 
 const upgrades=[
   {id:'streak1',name:'Streak Saver',icon:'🛡️',cost:1000,desc:'First loss doesn\'t reset streak',effect:{streakProtect:1}},
   {id:'streak2',name:'Double Streak',icon:'⚡',cost:50000,desc:'Earn 2 streak per win',requires:{streak1:true},effect:{streakMult:2}},
   {id:'streak3',name:'Triple Threat',icon:'💥',cost:500000,desc:'Earn 3 streak per win',requires:{streak2:true},effect:{streakMult:3}},
-  
   {id:'mult1',name:'Better Math',icon:'📐',cost:5000,desc:'Multiplier formula improved +10%',effect:{multBoost:1.1}},
   {id:'mult2',name:'Advanced Calculus',icon:'📊',cost:50000,desc:'Multiplier formula improved +20%',requires:{mult1:true},effect:{multBoost:1.2}},
   {id:'mult3',name:'Quantum Math',icon:'🔬',cost:500000,desc:'Multiplier formula improved +30%',requires:{mult2:true},effect:{multBoost:1.3}},
-  
   {id:'cash1',name:'Bigger Wallet',icon:'💰',cost:5000,desc:'Cashout value +50%',effect:{cashBoost:1.5}},
   {id:'cash2',name:'Vault',icon:'🏦',cost:100000,desc:'Cashout value +100%',requires:{cash1:true},effect:{cashBoost:2}},
   {id:'cash3',name:'Bank Empire',icon:'🏛️',cost:1000000,desc:'Cashout value +150%',requires:{cash2:true},effect:{cashBoost:2.5}},
-  
   {id:'synergy1',name:'Beginner\'s Luck',icon:'🍀',cost:7777,desc:'All bots +10% efficiency',effect:{allBots:1.1}},
   {id:'synergy2',name:'Team Spirit',icon:'🤝',cost:77777,desc:'All bots +20% efficiency',requires:{synergy1:true},effect:{allBots:1.2}},
   {id:'synergy3',name:'Perfect Harmony',icon:'☯️',cost:777777,desc:'All bots +50% efficiency',requires:{synergy2:true},effect:{allBots:1.5}},
-  
   {id:'auto1',name:'Faster Bots',icon:'⚡',cost:10000,desc:'All bots play 10% faster',effect:{speedBoost:1.1}},
   {id:'auto2',name:'Turbo Mode',icon:'🚀',cost:250000,desc:'All bots play 25% faster',requires:{auto1:true},effect:{speedBoost:1.25}},
   {id:'auto3',name:'Hyperspeed',icon:'💨',cost:5000000,desc:'All bots play 50% faster',requires:{auto2:true},effect:{speedBoost:1.5}},
-  
-  {id:'laser',name:'Laser Beam',icon:'🔴',cost:100000,desc:'Epic laser effects on wins!',effect:{hasLaser:true}},
-]
+  {id:'laser',name:'Laser Beam',icon:'🔴',cost:100000,desc:'Epic laser effects on wins!',effect:{hasLaser:true}}
+];
 
 const petTypes=[
   {id:0,emoji:'🐕',name:'Dog'},
@@ -278,206 +241,555 @@ const petTypes=[
   {id:6,emoji:'🦁',name:'Lion'},
   {id:7,emoji:'🐯',name:'Tiger'},
   {id:8,emoji:'🦅',name:'Eagle'},
-  {id:9,emoji:'🐺',name:'Wolf'},
-]
+  {id:9,emoji:'🐺',name:'Wolf'}
+];
 
 const backgrounds=[
   {id:0,name:'Default Space',class:''},
   {id:1,name:'Ocean Depths',class:'bg-ocean',cost:500000},
   {id:2,name:'Sunset Sky',class:'bg-sunset',cost:1000000},
   {id:3,name:'Forest Grove',class:'bg-forest',cost:2000000},
-  {id:4,name:'Neon City',class:'bg-neon',cost:5000000},
-]
+  {id:4,name:'Neon City',class:'bg-neon',cost:5000000}
+];
 
-let mode=+localStorage.getItem('mode')||0
-let money=+localStorage.getItem('money')||0
-let streak=0
-let streakProtectCharges=0
-let owned=JSON.parse(localStorage.getItem('owned'))||{}
-let boughtUpgrades=JSON.parse(localStorage.getItem('upgrades'))||{}
-let stats=JSON.parse(localStorage.getItem('stats'))||{best:0,earned:0,clicks:0}
-let rebirths=+localStorage.getItem('rebirths')||0
-let pets=JSON.parse(localStorage.getItem('pets'))||[]
-let currentBg=+localStorage.getItem('currentBg')||0
-let autoCollectEnabled=localStorage.getItem('autoCollect')!=='false'
-let ownedBackgrounds=JSON.parse(localStorage.getItem('ownedBg'))||[0]
+let mode=+localStorage.getItem('mode')||0;
+let money=+localStorage.getItem('money')||0;
+let streak=0;
+let streakProtectCharges=0;
+let owned=JSON.parse(localStorage.getItem('owned'))||{};
+let boughtUpgrades=JSON.parse(localStorage.getItem('upgrades'))||{};
+let stats=JSON.parse(localStorage.getItem('stats'))||{best:0,earned:0,clicks:0};
+let rebirths=+localStorage.getItem('rebirths')||0;
+let pets=JSON.parse(localStorage.getItem('pets'))||[];
+let currentBg=+localStorage.getItem('currentBg')||0;
+let autoCollectEnabled=localStorage.getItem('autoCollect')!=='false';
+let ownedBackgrounds=JSON.parse(localStorage.getItem('ownedBg'))||[0];
 
-buildings.forEach(b=>owned[b.id]=owned[b.id]||0)
+buildings.forEach(b=>owned[b.id]=owned[b.id]||0);
 
 function multiplier(){
-  let base=1+Math.pow(streak,1.4)/10
+  let base=1+Math.pow(streak,1.4)/10;
   Object.keys(boughtUpgrades).forEach(upId=>{
-    const up=upgrades.find(u=>u.id===upId)
+    const up=upgrades.find(u=>u.id===upId);
     if(up&&up.effect&&up.effect.multBoost){
-      base*=up.effect.multBoost
+      base*=up.effect.multBoost;
     }
-  })
-  return base
+  });
+  return base;
 }
 
 function payout(){
-  let base=Math.floor(streak*20*multiplier())
+  let base=Math.floor(streak*20*multiplier());
   Object.keys(boughtUpgrades).forEach(upId=>{
-    const up=upgrades.find(u=>u.id===upId)
+    const up=upgrades.find(u=>u.id===upId);
     if(up&&up.effect&&up.effect.cashBoost){
-      base*=up.effect.cashBoost
+      base*=up.effect.cashBoost;
     }
-  })
-  return Math.floor(base)
+  });
+  return Math.floor(base);
 }
 
 function calcPlaysPerSecond(){
-  let total=0
-  let allBotsMultiplier=1
-  let speedBoost=1
+  let total=0;
+  let allBotsMultiplier=1;
+  let speedBoost=1;
   
   Object.keys(boughtUpgrades).forEach(upId=>{
-    const up=upgrades.find(u=>u.id===upId)
+    const up=upgrades.find(u=>u.id===upId);
     if(up&&up.effect&&up.effect.allBots){
-      allBotsMultiplier*=up.effect.allBots
+      allBotsMultiplier*=up.effect.allBots;
     }
     if(up&&up.effect&&up.effect.speedBoost){
-      speedBoost*=up.effect.speedBoost
+      speedBoost*=up.effect.speedBoost;
     }
-  })
+  });
   
-  const rebirthBonus=1+(rebirths*0.1)
+  const rebirthBonus=1+(rebirths*0.1);
   
   buildings.forEach(b=>{
-    if(!b.isBot)return
-    total+=(b.speed||1)*owned[b.id]*allBotsMultiplier*speedBoost*rebirthBonus
-  })
-  return total
+    if(!b.isBot)return;
+    total+=(b.speed||1)*owned[b.id]*allBotsMultiplier*speedBoost*rebirthBonus;
+  });
+  return total;
 }
 
 function calcLuck(){
-  let total=0
+  let total=0;
   buildings.forEach(b=>{
     if(b.isLuck){
-      total+=(b.luck||0)*owned[b.id]
+      total+=(b.luck||0)*owned[b.id];
     }
-  })
-  return Math.min(total,95)
+  });
+  return Math.min(total,95);
 }
 
 function getAutoCollectThreshold(){
-  if(!autoCollectEnabled)return 0
-  let total=5*owned['collector']
-  return total
+  if(!autoCollectEnabled)return 0;
+  let total=5*owned['collector'];
+  return total;
 }
 
 function getCost(b){
-  return Math.floor(b.baseCost*Math.pow(1.15,owned[b.id]))
+  return Math.floor(b.baseCost*Math.pow(1.15,owned[b.id]));
 }
 
 function update(){
-  document.getElementById('streak').textContent=streak
-  document.getElementById('mult').textContent='x'+multiplier().toFixed(2)
-  document.getElementById('cash').textContent='$'+formatNum(payout())
-  document.getElementById('pps').textContent=formatNum(calcPlaysPerSecond())+'/s'
-  document.getElementById('luck').textContent=calcLuck()+'%'
-  document.getElementById('shields').textContent=streakProtectCharges
-  document.getElementById('rebirths').textContent=rebirths
-  document.getElementById('petCount').textContent=pets.length
+  document.getElementById('streak').textContent=streak;
+  document.getElementById('mult').textContent='x'+multiplier().toFixed(2);
+  document.getElementById('cash').textContent='$'+formatNum(payout());
+  document.getElementById('pps').textContent=formatNum(calcPlaysPerSecond())+'/s';
+  document.getElementById('luck').textContent=calcLuck()+'%';
+  document.getElementById('shields').textContent=streakProtectCharges;
+  document.getElementById('rebirths').textContent=rebirths;
+  document.getElementById('petCount').textContent=pets.length;
   
-  const m=document.getElementById('moneyDisplay')
-  m.textContent='$'+formatNum(money)
-  m.classList.add('money-pop')
-  setTimeout(()=>m.classList.remove('money-pop'),200)
+  const m=document.getElementById('moneyDisplay');
+  m.textContent='$'+formatNum(money);
+  m.classList.add('money-pop');
+  setTimeout(()=>m.classList.remove('money-pop'),200);
   
-  document.getElementById('cashoutBtn').disabled=streak<1
+  document.getElementById('cashoutBtn').disabled=streak<1;
   
   for(let i=1;i<=4;i++){
-    const elem=document.getElementById('bg'+i)
+    const elem=document.getElementById('bg'+i);
     if(elem){
       if(ownedBackgrounds.includes(i)){
-        elem.classList.remove('disabled')
+        elem.classList.remove('disabled');
       }else{
-        elem.classList.add('disabled')
+        elem.classList.add('disabled');
       }
     }
   }
 }
 
 function formatNum(n){
-  if(n>=1e9)return(n/1e9).toFixed(2)+'B'
-  if(n>=1e6)return(n/1e6).toFixed(2)+'M'
-  if(n>=1e3)return(n/1e3).toFixed(1)+'K'
-  return Math.floor(n)
+  if(n>=1e9)return(n/1e9).toFixed(2)+'B';
+  if(n>=1e6)return(n/1e6).toFixed(2)+'M';
+  if(n>=1e3)return(n/1e3).toFixed(1)+'K';
+  return Math.floor(n);
 }
 
 function roll(final){
-  const elem=document.getElementById('computerChoice')
-  let i=0
-  const frames=['✊','✋','✌️']
+  const elem=document.getElementById('computerChoice');
+  let i=0;
+  const frames=['✊','✋','✌️'];
   const interval=setInterval(()=>{
-    elem.textContent=frames[i++%3]
-  },80)
+    elem.textContent=frames[i++%3];
+  },80);
   setTimeout(()=>{
-    clearInterval(interval)
-    elem.textContent=final
-  },600)
+    clearInterval(interval);
+    elem.textContent=final;
+  },600);
 }
 
 function processGame(player,isBot){
-  const comp=choices[Math.floor(Math.random()*3)]
+  const comp=choices[Math.floor(Math.random()*3)];
   
   if(player===comp){
-    return comp
+    return comp;
   }
   
-  let win=
-    (player==='rock'&&comp==='paper')||
-    (player==='paper'&&comp==='scissors')||
-    (player==='scissors'&&comp==='rock')
+  let win=(player==='rock'&&comp==='paper')||(player==='paper'&&comp==='scissors')||(player==='scissors'&&comp==='rock');
 
   if(!win){
-    const luckChance=calcLuck()
+    const luckChance=calcLuck();
     if(Math.random()*100<luckChance){
-      win=true
-      if(!isBot)spawnParticle('🍀 LUCKY!')
+      win=true;
+      if(!isBot)spawnParticle('🍀 LUCKY!');
     }
   }
 
   if(win){
-    let streakGain=1
+    let streakGain=1;
     Object.keys(boughtUpgrades).forEach(upId=>{
-      const up=upgrades.find(u=>u.id===upId)
+      const up=upgrades.find(u=>u.id===upId);
       if(up&&up.effect&&up.effect.streakMult){
-        streakGain=up.effect.streakMult
+        streakGain=up.effect.streakMult;
       }
-    })
+    });
     
-    streak+=streakGain
+    streak+=streakGain;
     if(!isBot){
-      stats.clicks++
+      stats.clicks++;
       if(streakGain>1){
-        spawnParticle(`+${streakGain} STREAK!`)
+        spawnParticle(`+${streakGain} STREAK!`);
       }
     }
   }else{
     if(streakProtectCharges>0){
-      streakProtectCharges--
-      if(!isBot)spawnParticle('🛡️ PROTECTED!')
+      streakProtectCharges--;
+      if(!isBot)spawnParticle('🛡️ PROTECTED!');
     }else{
-      streak=0
+      streak=0;
     }
   }
 
-  stats.best=Math.max(stats.best,streak)
-  localStorage.setItem('money',money)
-  localStorage.setItem('stats',JSON.stringify(stats))
+  stats.best=Math.max(stats.best,streak);
+  localStorage.setItem('money',money);
+  localStorage.setItem('stats',JSON.stringify(stats));
   
-  const threshold=getAutoCollectThreshold()
+  const threshold=getAutoCollectThreshold();
   if(threshold>0&&streak>=threshold){
-    cashOut(true)
+    cashOut(true);
   }
   
-  return comp
+  return comp;
 }
 
 function guess(player){
-  const comp=processGame(player,false)
-  roll(displaySets[mode][comp])
+  const comp=processGame(player,false);
+  roll(displaySets[mode][comp]);
   
-  if(boughtUpgrades['laser']&&((player
+  if(boughtUpgrades['laser']&&((player==='rock'&&comp==='paper')||(player==='paper'&&comp==='scissors')||(player==='scissors'&&comp==='rock'))){
+    shootLaser();
+  }
+  
+  setTimeout(update,700);
+}
+
+function quickPlay(){
+  const player=choices[Math.floor(Math.random()*3)];
+  guess(player);
+}
+
+function cashOut(isAuto){
+  if(streak<1)return;
+  const gain=payout();
+  money+=gain;
+  stats.earned+=gain;
+  streak=0;
+  localStorage.setItem('money',money);
+  localStorage.setItem('stats',JSON.stringify(stats));
+  spawnParticle((isAuto?'🤖 AUTO: ':'')+'++formatNum(gain));
+  update();
+}
+
+function spawnParticle(text){
+  const p=document.createElement('div');
+  p.className='particle';
+  p.textContent=text;
+  p.style.left=(Math.random()*60+20)+'%';
+  p.style.top='50%';
+  p.style.color='#22c55e';
+  p.style.fontSize='24px';
+  document.body.appendChild(p);
+  setTimeout(()=>p.remove(),1000);
+}
+
+function openModal(id){
+  document.getElementById(id).style.display='flex';
+  if(id==='stats'){
+    document.getElementById('statsContent').innerHTML=`
+      <div style="color:#94a3b8;line-height:2.2;font-size:16px">
+        Best Streak: <strong style="color:#22c55e">${stats.best}</strong><br>
+        Total Earned: <strong style="color:#fbbf24">${formatNum(stats.earned)}</strong><br>
+        Manual Clicks: <strong style="color:#3b82f6">${stats.clicks}</strong><br>
+        Buildings Owned: <strong style="color:#8b5cf6">${Object.values(owned).reduce((a,b)=>a+b,0)}</strong><br>
+        Rebirths: <strong style="color:#f59e0b">${rebirths}</strong><br>
+        Pets: <strong style="color:#ec4899">${pets.length}</strong>
+      </div>
+    `;
+  }
+  if(id==='tech'){
+    renderBuildings();
+    renderUpgrades();
+  }
+  if(id==='settings'){
+    document.getElementById('rebirthBonus').textContent=(rebirths*10);
+    document.getElementById('rebirthReq').textContent=formatNum(1000000*Math.pow(10,rebirths));
+    document.getElementById('autoCollectToggle').checked=autoCollectEnabled;
+  }
+}
+
+function closeModal(id){
+  document.getElementById(id).style.display='none';
+}
+
+function setMode(m){
+  mode=m;
+  localStorage.setItem('mode',m);
+  closeModal('settings');
+}
+
+function buyBuilding(b){
+  const cost=getCost(b);
+  if(money<cost)return;
+  money-=cost;
+  owned[b.id]++;
+  localStorage.setItem('money',money);
+  localStorage.setItem('owned',JSON.stringify(owned));
+  update();
+  renderBuildings();
+  renderUpgrades();
+}
+
+function buyUpgrade(u){
+  if(money<u.cost)return;
+  if(boughtUpgrades[u.id])return;
+  
+  if(u.requires){
+    for(let key in u.requires){
+      if(!boughtUpgrades[key])return;
+    }
+  }
+  
+  money-=u.cost;
+  boughtUpgrades[u.id]=true;
+  
+  if(u.effect&&u.effect.streakProtect){
+    streakProtectCharges+=u.effect.streakProtect;
+  }
+  
+  localStorage.setItem('money',money);
+  localStorage.setItem('upgrades',JSON.stringify(boughtUpgrades));
+  update();
+  renderBuildings();
+  renderUpgrades();
+}
+
+function renderBuildings(){
+  document.getElementById('buildingsContainer').innerHTML=buildings.map(b=>{
+    const cost=getCost(b);
+    const canBuy=money>=cost;
+    
+    let extraInfo='';
+    if(b.isBot){
+      extraInfo=`<span class="building-production">plays ${b.speed||1}/s</span>`;
+    }else if(b.isCollector){
+      extraInfo=`<span class="building-production">+${b.threshold} to threshold</span>`;
+    }else if(b.isLuck){
+      extraInfo=`<span class="building-production">+${b.luck}% luck</span>`;
+    }
+    
+    return `
+      <div class="building ${!canBuy?'disabled':''}" onclick="buyBuilding(buildings[${buildings.indexOf(b)}])">
+        <div class="building-icon">${b.icon}</div>
+        <div class="building-info">
+          <div class="building-header">
+            <span class="building-name">${b.name}</span>
+            <span class="building-owned">${owned[b.id]}</span>
+          </div>
+          <div class="building-desc">${b.desc}</div>
+          <div class="building-stats">
+            <span class="building-cost">${formatNum(cost)}</span>
+            ${extraInfo}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderUpgrades(){
+  document.getElementById('upgradesContainer').innerHTML=upgrades.map(u=>{
+    const canBuy=money>=u.cost;
+    const isPurchased=boughtUpgrades[u.id];
+    let meetsReq=true;
+    
+    if(u.requires){
+      for(let key in u.requires){
+        if(!boughtUpgrades[key])meetsReq=false;
+      }
+    }
+    
+    const disabled=!canBuy||!meetsReq;
+    
+    return `
+      <div class="upgrade ${disabled?'disabled':''} ${isPurchased?'purchased':''}" 
+           onclick="buyUpgrade(upgrades.find(x=>x.id==='${u.id}'))"
+           onmouseenter="showTooltip(event,upgrades.find(x=>x.id==='${u.id}'))"
+           onmouseleave="hideTooltip()">
+        <div class="upgrade-icon">${u.icon}</div>
+        <div class="upgrade-cost">${formatNum(u.cost)}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function showTooltip(e,u){
+  const tt=document.getElementById('tooltip');
+  tt.querySelector('.tooltip-title').textContent=u.name;
+  tt.querySelector('.tooltip-desc').textContent=u.desc;
+  tt.querySelector('.tooltip-cost').textContent='Cost: +formatNum(u.cost);
+  tt.classList.add('show');
+  
+  const rect=e.target.closest('.upgrade').getBoundingClientRect();
+  tt.style.left=rect.right+10+'px';
+  tt.style.top=rect.top+'px';
+}
+
+function hideTooltip(){
+  document.getElementById('tooltip').classList.remove('show');
+}
+
+function doRebirth(){
+  const req=1000000*Math.pow(10,rebirths);
+  if(money<req){
+    alert('Not enough money! Need: +formatNum(req));
+    return;
+  }
+  
+  if(!confirm('Reset ALL progress for +10% permanent production bonus and a new pet?')){
+    return;
+  }
+  
+  rebirths++;
+  
+  const newPetType=petTypes[rebirths%petTypes.length];
+  const newPet={
+    type:newPetType.id,
+    emoji:newPetType.emoji,
+    x:Math.random()*80+10,
+    y:Math.random()*60+20,
+    vx:(Math.random()-0.5)*2,
+    vy:(Math.random()-0.5)*2
+  };
+  pets.push(newPet);
+  
+  money=0;
+  streak=0;
+  streakProtectCharges=0;
+  owned={};
+  boughtUpgrades={};
+  buildings.forEach(b=>owned[b.id]=0);
+  
+  localStorage.setItem('rebirths',rebirths);
+  localStorage.setItem('pets',JSON.stringify(pets));
+  localStorage.setItem('money',money);
+  localStorage.setItem('owned',JSON.stringify(owned));
+  localStorage.setItem('upgrades',JSON.stringify(boughtUpgrades));
+  
+  closeModal('settings');
+  update();
+  renderPets();
+  spawnParticle('🔄 REBIRTH! +10% PRODUCTION');
+}
+
+function toggleAutoCollect(){
+  autoCollectEnabled=document.getElementById('autoCollectToggle').checked;
+  localStorage.setItem('autoCollect',autoCollectEnabled);
+}
+
+function buyBg(id){
+  if(ownedBackgrounds.includes(id)){
+    selectBg(id);
+    return;
+  }
+  
+  const bg=backgrounds[id];
+  if(!bg||!bg.cost)return;
+  
+  if(money<bg.cost){
+    alert('Not enough money!');
+    return;
+  }
+  
+  money-=bg.cost;
+  ownedBackgrounds.push(id);
+  localStorage.setItem('money',money);
+  localStorage.setItem('ownedBg',JSON.stringify(ownedBackgrounds));
+  selectBg(id);
+  update();
+}
+
+function selectBg(id){
+  if(!ownedBackgrounds.includes(id))return;
+  currentBg=id;
+  localStorage.setItem('currentBg',id);
+  
+  document.body.className='';
+  const bg=backgrounds[id];
+  if(bg&&bg.class){
+    document.body.classList.add(bg.class);
+  }
+}
+
+function shootLaser(){
+  const laser=document.createElement('div');
+  laser.className='laser';
+  
+  const btn=document.querySelector('.buttons');
+  const rect=btn.getBoundingClientRect();
+  const choice=document.getElementById('computerChoice');
+  const targetRect=choice.getBoundingClientRect();
+  
+  laser.style.left=rect.left+rect.width/2+'px';
+  laser.style.top=rect.top+rect.height/2+'px';
+  
+  const dx=targetRect.left-rect.left;
+  const dy=targetRect.top-rect.top;
+  const angle=Math.atan2(dy,dx);
+  const length=Math.sqrt(dx*dx+dy*dy);
+  
+  laser.style.transform=`rotate(${angle}rad)`;
+  laser.style.setProperty('--laser-length',length+'px');
+  
+  document.body.appendChild(laser);
+  setTimeout(()=>laser.remove(),400);
+}
+
+function renderPets(){
+  document.querySelectorAll('.pet').forEach(p=>p.remove());
+  
+  pets.forEach(pet=>{
+    const elem=document.createElement('div');
+    elem.className='pet';
+    elem.textContent=pet.emoji;
+    elem.style.left=pet.x+'%';
+    elem.style.top=pet.y+'%';
+    document.body.appendChild(elem);
+  });
+}
+
+function updatePets(){
+  pets.forEach((pet,i)=>{
+    pet.x+=pet.vx*0.1;
+    pet.y+=pet.vy*0.1;
+    
+    if(pet.x<0||pet.x>95){
+      pet.vx*=-1;
+      pet.x=Math.max(0,Math.min(95,pet.x));
+    }
+    if(pet.y<10||pet.y>85){
+      pet.vy*=-1;
+      pet.y=Math.max(10,Math.min(85,pet.y));
+    }
+    
+    const elem=document.querySelectorAll('.pet')[i];
+    if(elem){
+      elem.style.left=pet.x+'%';
+      elem.style.top=pet.y+'%';
+    }
+  });
+  
+  if(Math.random()<0.02){
+    pets.forEach(pet=>{
+      pet.vx+=(Math.random()-0.5)*0.5;
+      pet.vy+=(Math.random()-0.5)*0.5;
+      pet.vx=Math.max(-2,Math.min(2,pet.vx));
+      pet.vy=Math.max(-2,Math.min(2,pet.vy));
+    });
+  }
+}
+
+setInterval(()=>{
+  const pps=calcPlaysPerSecond();
+  if(pps>0){
+    const playsThisTick=Math.min(pps/10,100);
+    for(let i=0;i<playsThisTick;i++){
+      const move=choices[Math.floor(Math.random()*3)];
+      processGame(move,true);
+    }
+    update();
+  }
+},100);
+
+setInterval(updatePets,50);
+
+selectBg(currentBg);
+renderPets();
+update();
+</script>
+
+</body>
+</html>
