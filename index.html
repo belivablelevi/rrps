@@ -1,0 +1,12 @@
+let mode=+localStorage.getItem('mode')||0
+let money=+localStorage.getItem('money')||0
+let streak=0
+let streakProtectCharges=0
+let owned=JSON.parse(localStorage.getItem('owned'))||{}
+let boughtUpgrades=JSON.parse(localStorage.getItem('upgrades'))||{}
+let stats=JSON.parse(localStorage.getItem('stats'))||{best:0,earned:0,clicks:0}
+let rebirths=+localStorage.getItem('rebirths')||0
+let pets=JSON.parse(localStorage.getItem('pets'))||[]
+let currentBg=+localStorage.getItem('currentBg')||0
+let autoCollectEnabled=localStorage.getItem('autoCollect')!=='false'
+let ownedBackgrounds=JSON.parse(localStorage.getItem('ownedBg'))||[0]
