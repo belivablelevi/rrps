@@ -20,8 +20,16 @@ body{
   position:fixed;top:16px;right:16px;background:linear-gradient(135deg,#10b981,#22c55e);
   padding:14px 26px;border-radius:999px;font-weight:900;font-size:20px;color:#022c22;
   box-shadow:0 12px 30px rgba(16,185,129,.6);z-index:10;transition:transform .25s;
+  display:flex;align-items:center;gap:10px;
 }
 .money-pop{transform:scale(1.15);}
+
+.coin-particle{
+  position:fixed;pointer-events:none;font-weight:900;animation:coinFloat 1s ease forwards;z-index:60;
+  font-size:18px;
+}
+@keyframes coinFloat{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-80px) scale(.5)}}
+
 .container{
   max-width:900px;margin:120px auto;background:#020617cc;backdrop-filter:blur(12px);
   padding:36px;border-radius:30px;text-align:center;box-shadow:0 50px 120px rgba(0,0,0,.6);
@@ -96,7 +104,7 @@ h1{font-size:2.6rem;margin-bottom:20px}
 .particle{position:fixed;pointer-events:none;font-weight:900;animation:float 1s ease forwards;z-index:5;}
 @keyframes float{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-60px)}}
 .pet{position:fixed;font-size:32px;pointer-events:none;z-index:4;transition:transform 0.3s;}
-.laser{position:fixed;height:4px;background:linear-gradient(90deg,#ef4444,#f59e0b,#22c55e);pointer-events:none;z-index:3;animation:laser-shoot 0.4s ease forwards;transform-origin:left center;box-shadow:0 0 20px #ef4444;}
+.laser{position:fixed;height:4px;background:linear-gradient(90deg,#ef4444,#f59e0b,#22c55e);pointer-events:none;z-index:3;animation:laser-shoot 0.4s ease forwards;transform-origin:left center;box-shadow:0 6px 18px rgba(255,120,80,.6);border-radius:4px;}
 @keyframes laser-shoot{0%{width:0;opacity:1}100%{width:var(--laser-length);opacity:0}}
 .bg-space{background:radial-gradient(circle at 30% 50%,#1e1b4b,#0c0a1f);}
 .bg-ocean{background:linear-gradient(180deg,#0e7490,#06b6d4,#164e63);}
@@ -105,12 +113,17 @@ h1{font-size:2.6rem;margin-bottom:20px}
 .bg-neon{background:linear-gradient(45deg,#831843,#be123c,#e11d48,#9333ea);}
 .checkbox{display:inline-flex;align-items:center;gap:8px;cursor:pointer;user-select:none;}
 .checkbox input{width:20px;height:20px;cursor:pointer;}
+
+/* small UI for pets inside money display */
+#equippedPet{font-size:22px;opacity:.95;transform-origin:center center;}
+.equippedPulse{animation:equipPulse .9s ease}
+@keyframes equipPulse{0%{transform:scale(1)}30%{transform:scale(1.35)}100%{transform:scale(1)}}
 </style>
 </head>
 <body>
 
-<div id="moneyDisplay">$0</div>
-<div class="container">
+<div id="moneyDisplay"><div id="equippedPet"></div><div id="moneyText">$0</div></div>
+<div class="container" id="mainContainer">
 <h1>Reverse Rock Paper Scissors</h1>
 <div id="computerChoice" class="choice" onclick="quickPlay()">?</div>
 <div class="buttons">
@@ -150,13 +163,18 @@ h1{font-size:2.6rem;margin-bottom:20px}
 <input type="checkbox" id="autoCollectToggle" onchange="toggleAutoCollect()">
 <span>Enable Auto-Collection</span>
 </label>
+
+<h3 style="margin-top:20px">Pets</h3>
+<p style="color:#94a3b8;margin-bottom:8px">Pets are unlocked on rebirth. Equip a pet for small visual flair and bonus animations.</p>
+<div id="petsContainer" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:12px"></div>
+
 <h3 style="margin-top:20px;color:#f59e0b">Rebirth System</h3>
 <p style="color:#94a3b8;margin-bottom:12px">Reset all progress for permanent bonuses! Each rebirth gives +10% to ALL production and unlocks a new pet companion.</p>
 <div style="background:#0f172a;padding:16px;border-radius:12px;margin-bottom:12px">
 <div style="color:#22c55e;font-weight:800;margin-bottom:8px">Current Rebirth Bonus: +<span id="rebirthBonus">0</span>%</div>
 <div style="color:#8b5cf6">Next Rebirth Requires: $<span id="rebirthReq">1000000</span></div>
 </div>
-<button onclick="doRebirth()" style="width:100%;padding:16px;border:none;border-radius:12px;background:linear-gradient(135deg,#f59e0b,#dc2626);color:white;font-weight:800;cursor:pointer;font-size:16px">🔄 REBIRTH</button>
+<button onclick="doRebirth()" style="width:100%;padding:16px;border:none;border-radius:12px;background:linear-gradient(135deg,#f59e0b,#dc2626);color:white;font-weight:800;cursor:pointer;font-size:16px">Rebirth Now</button>
 <button class="close" onclick="closeModal('settings')">Close</button>
 </div></div>
 
@@ -205,6 +223,7 @@ h1{font-size:2.6rem;margin-bottom:20px}
 </div>
 </div>
 </div>
+
 <h3 style="color:#22c55e">Buildings</h3>
 <div id="buildingsContainer" class="buildings-grid"></div>
 <h3 style="color:#8b5cf6">Upgrades</h3>
@@ -225,6 +244,7 @@ h1{font-size:2.6rem;margin-bottom:20px}
 </div>
 
 <script>
+/* ---------- Data & State ---------- */
 const choices=['rock','paper','scissors']
 const displaySets=[
   {rock:'✊',paper:'✋',scissors:'✌️'},
@@ -282,7 +302,7 @@ const petTypes=[
 ]
 
 const backgrounds=[
-  {id:0,name:'Default Space',class:''},
+  {id:0,name:'Default Space',class:'bg-space'},
   {id:1,name:'Ocean Depths',class:'bg-ocean',cost:500000},
   {id:2,name:'Sunset Sky',class:'bg-sunset',cost:1000000},
   {id:3,name:'Forest Grove',class:'bg-forest',cost:2000000},
@@ -292,18 +312,20 @@ const backgrounds=[
 let mode=+localStorage.getItem('mode')||0
 let money=+localStorage.getItem('money')||0
 let streak=0
-let streakProtectCharges=0
+let streakProtectCharges=+localStorage.getItem('streakProtectCharges')||0
 let owned=JSON.parse(localStorage.getItem('owned'))||{}
 let boughtUpgrades=JSON.parse(localStorage.getItem('upgrades'))||{}
 let stats=JSON.parse(localStorage.getItem('stats'))||{best:0,earned:0,clicks:0}
 let rebirths=+localStorage.getItem('rebirths')||0
-let pets=JSON.parse(localStorage.getItem('pets'))||[]
+let pets=JSON.parse(localStorage.getItem('pets'))||[]        // unlocked pets (by rebirth)
+let equippedPetIndex=+localStorage.getItem('equippedPet')||-1 // -1 = none
 let currentBg=+localStorage.getItem('currentBg')||0
 let autoCollectEnabled=localStorage.getItem('autoCollect')!=='false'
 let ownedBackgrounds=JSON.parse(localStorage.getItem('ownedBg'))||[0]
 
 buildings.forEach(b=>owned[b.id]=owned[b.id]||0)
 
+/* ---------- Core Gameplay ---------- */
 function multiplier(){
   let base=1+Math.pow(streak,1.4)/10
   Object.keys(boughtUpgrades).forEach(upId=>{
@@ -370,6 +392,7 @@ function getCost(b){
   return Math.floor(b.baseCost*Math.pow(1.15,owned[b.id]))
 }
 
+/* ---------- UI Update & Persistence ---------- */
 function update(){
   document.getElementById('streak').textContent=streak
   document.getElementById('mult').textContent='x'+multiplier().toFixed(2)
@@ -380,10 +403,18 @@ function update(){
   document.getElementById('rebirths').textContent=rebirths
   document.getElementById('petCount').textContent=pets.length
   
-  const m=document.getElementById('moneyDisplay')
-  m.textContent='$'+formatNum(money)
-  m.classList.add('money-pop')
-  setTimeout(()=>m.classList.remove('money-pop'),200)
+  const mText=document.getElementById('moneyText')
+  const eqPet=document.getElementById('equippedPet')
+  mText.textContent='$'+formatNum(money)
+  mText.parentElement.classList.add('money-pop')
+  setTimeout(()=>mText.parentElement.classList.remove('money-pop'),220)
+  
+  // equipped pet display
+  if(equippedPetIndex>=0 && pets[equippedPetIndex]){
+    eqPet.textContent = pets[equippedPetIndex].emoji
+  } else {
+    eqPet.textContent = ''
+  }
   
   document.getElementById('cashoutBtn').disabled=streak<1
   
@@ -397,8 +428,27 @@ function update(){
       }
     }
   }
+
+  // render buildings & upgrades & pets & stats UI
+  renderBuildings()
+  renderUpgrades()
+  renderPets()
+  renderStatsContent()
+
+  // persistence
+  localStorage.setItem('money',money)
+  localStorage.setItem('owned',JSON.stringify(owned))
+  localStorage.setItem('upgrades',JSON.stringify(boughtUpgrades))
+  localStorage.setItem('pets',JSON.stringify(pets))
+  localStorage.setItem('equippedPet',equippedPetIndex)
+  localStorage.setItem('currentBg',currentBg)
+  localStorage.setItem('ownedBg',JSON.stringify(ownedBackgrounds))
+  localStorage.setItem('streakProtectCharges',streakProtectCharges)
+  localStorage.setItem('rebirths',rebirths)
+  localStorage.setItem('stats',JSON.stringify(stats))
 }
 
+/* ---------- Helpers ---------- */
 function formatNum(n){
   if(n>=1e9)return(n/1e9).toFixed(2)+'B'
   if(n>=1e6)return(n/1e6).toFixed(2)+'M'
@@ -419,6 +469,7 @@ function roll(final){
   },600)
 }
 
+/* ---------- Game Processing ---------- */
 function processGame(player,isBot){
   const comp=choices[Math.floor(Math.random()*3)]
   
@@ -454,6 +505,8 @@ function processGame(player,isBot){
       if(streakGain>1){
         spawnParticle(`+${streakGain} STREAK!`)
       }
+      // small satisfying feedback on manual plays
+      flashChoice()
     }
   }else{
     if(streakProtectCharges>0){
@@ -465,8 +518,6 @@ function processGame(player,isBot){
   }
 
   stats.best=Math.max(stats.best,streak)
-  localStorage.setItem('money',money)
-  localStorage.setItem('stats',JSON.stringify(stats))
   
   const threshold=getAutoCollectThreshold()
   if(threshold>0&&streak>=threshold){
@@ -476,8 +527,401 @@ function processGame(player,isBot){
   return comp
 }
 
+/* ---------- Player actions ---------- */
 function guess(player){
   const comp=processGame(player,false)
   roll(displaySets[mode][comp])
   
-  if(boughtUpgrades['laser']&&((player
+  if(boughtUpgrades['laser'] && typeof spawnLaser === 'function'){
+    spawnLaser()
+  }
+  update()
+}
+
+function quickPlay(){
+  const players=['rock','paper','scissors']
+  const pick=players[Math.floor(Math.random()*3)]
+  guess(pick)
+}
+
+/* ---------- Cashout: improved feedback ---------- */
+function cashOut(isAuto=false){
+  if(streak<1) return
+  let amount=payout()
+  // rebirth bonus
+  amount = Math.floor(amount * (1 + rebirths * 0.1))
+  const gained = amount
+  // animate incrementing money (satisfying tick)
+  const start = money
+  const steps = Math.min(35, Math.max(6, Math.floor(gained/Math.max(1,1000))))
+  let step = 0
+  const inc = Math.ceil(gained/steps)
+  const tick = setInterval(()=>{
+    step++
+    const add = (step<steps) ? inc : (gained - (inc*(steps-1)))
+    money += add
+    spawnCoinBurst(6)
+    update()
+    if(step>=steps){
+      clearInterval(tick)
+      finalizeCashout(gained, isAuto)
+    }
+  }, 40)
+  // reset streak and play sound etc handled in finalizeCashout
+}
+
+function finalizeCashout(gained, isAuto){
+  stats.earned += gained
+  spawnParticle(`+$${formatNum(gained)}`)
+  playChime()
+  // pet reaction
+  if(equippedPetIndex>=0 && pets[equippedPetIndex]){
+    petCelebrate()
+  }
+  streak = 0
+  update()
+}
+
+/* ---------- Backgrounds ---------- */
+function selectBg(id){
+  if(!ownedBackgrounds.includes(id)) return
+  const main=document.getElementById('mainContainer')
+  backgrounds.forEach(b=>main.classList.remove(b.class))
+  const bg = backgrounds.find(b=>b.id===id)
+  if(bg && bg.class) main.classList.add(bg.class)
+  currentBg=id
+  localStorage.setItem('currentBg',currentBg)
+}
+
+function buyBg(id){
+  const bg = backgrounds.find(b=>b.id===id)
+  if(!bg) return
+  if(ownedBackgrounds.includes(id)) return selectBg(id)
+  if(money >= bg.cost){
+    money -= bg.cost
+    ownedBackgrounds.push(id)
+    selectBg(id)
+    spawnParticle('🎉 BACKGROUND!')
+    update()
+  }else{
+    spawnParticle('❌ Not enough money')
+  }
+}
+
+/* ---------- Buildings & Upgrades ---------- */
+function buyBuilding(id){
+  const b = buildings.find(x=>x.id===id)
+  if(!b) return
+  const cost = getCost(b)
+  if(money >= cost){
+    money -= cost
+    owned[id] = (owned[id]||0) + 1
+    spawnParticle(`+1 ${b.name}`)
+    update()
+  }else{
+    spawnParticle('❌ Not enough money')
+  }
+}
+
+function buyUpgrade(id){
+  const up = upgrades.find(u=>u.id===id)
+  if(!up) return
+  if(boughtUpgrades[id]) return
+  // check requirements
+  if(up.requires){
+    for(const req in up.requires){
+      if(!boughtUpgrades[req]) {
+        spawnParticle('❌ Requires other upgrade')
+        return
+      }
+    }
+  }
+  if(money >= up.cost){
+    money -= up.cost
+    boughtUpgrades[id] = true
+    // apply immediate effects (streak protect)
+    if(up.effect && up.effect.streakProtect){
+      streakProtectCharges += up.effect.streakProtect
+    }
+    spawnParticle('⚙️ Upgrade!')
+    update()
+  }else{
+    spawnParticle('❌ Not enough money')
+  }
+}
+
+/* ---------- Render helpers ---------- */
+function renderBuildings(){
+  const container=document.getElementById('buildingsContainer')
+  if(!container) return
+  container.innerHTML=''
+  buildings.forEach(b=>{
+    const div=document.createElement('div')
+    div.className='building' + ((getCost(b) > money) ? ' disabled' : '')
+    div.onclick=()=>{ if(getCost(b) <= money) buyBuilding(b.id) }
+    div.innerHTML=`
+      <div class="building-icon">${b.icon}</div>
+      <div class="building-info">
+        <div class="building-header"><span class="building-name">${b.name}</span><span class="building-owned">${owned[b.id]||0}</span></div>
+        <div class="building-desc">${b.desc}</div>
+        <div class="building-stats"><span class="building-cost">$${formatNum(getCost(b))}</span><span class="building-production">${b.isBot? (b.speed+' p/s') : (b.isLuck? ('+'+b.luck+'% luck') : '')}</span></div>
+      </div>
+    `
+    container.appendChild(div)
+  })
+}
+
+function renderUpgrades(){
+  const container=document.getElementById('upgradesContainer')
+  if(!container) return
+  container.innerHTML=''
+  upgrades.forEach(u=>{
+    const purchased = !!boughtUpgrades[u.id]
+    const meetsReq = !u.requires || Object.keys(u.requires).every(r=>boughtUpgrades[r])
+    const disabled = (!meetsReq) || (!purchased && money < u.cost)
+    const div=document.createElement('div')
+    div.className='upgrade' + (disabled? ' disabled':'') + (purchased? ' purchased':'')
+    div.onclick=()=>{ if(!purchased && meetsReq) buyUpgrade(u.id) }
+    div.innerHTML=`
+      <div class="upgrade-icon">${u.icon}</div>
+      <div style="font-weight:800;margin-bottom:6px">${u.name}</div>
+      <div class="upgrade-cost">$${formatNum(u.cost)}</div>
+    `
+    div.onmouseenter=(e)=>{
+      showTooltip(e, u.name, u.desc, '$'+formatNum(u.cost))
+    }
+    div.onmouseleave=hideTooltip
+    container.appendChild(div)
+  })
+}
+
+/* ---------- Pets UI & logic ---------- */
+function renderPets(){
+  const container=document.getElementById('petsContainer')
+  if(!container) return
+  container.innerHTML=''
+  // Owned pets (from pets array). Show equip/select
+  pets.forEach((p, idx)=>{
+    const div=document.createElement('div')
+    div.style.background='#0f172a'
+    div.style.border='1px solid #1e293b'
+    div.style.borderRadius='12px'
+    div.style.padding='10px'
+    div.style.display='flex'
+    div.style.alignItems='center'
+    div.style.justifyContent='space-between'
+    div.innerHTML = `<div style="display:flex;gap:10px;align-items:center"><div style="font-size:28px">${p.emoji}</div><div style="font-weight:800">${p.name}</div></div><div><button style="padding:8px 10px;border-radius:8px;border:none;background:${equippedPetIndex===idx?'#10b981':'#3b82f6'};color:white;cursor:pointer" onclick="equipPet(${idx})">${equippedPetIndex===idx?'Equipped':'Equip'}</button></div>`
+    container.appendChild(div)
+  })
+  if(pets.length===0){
+    container.innerHTML='<div style="color:#94a3b8">No pets unlocked yet. Get a rebirth to unlock one!</div>'
+  }
+}
+
+function equipPet(index){
+  if(!pets[index]) return
+  equippedPetIndex = index
+  // small pulse feedback
+  const eqEl = document.getElementById('equippedPet')
+  eqEl.classList.add('equippedPulse')
+  setTimeout(()=>eqEl.classList.remove('equippedPulse'),900)
+  update()
+}
+
+/* ---------- Stats panel ---------- */
+function renderStatsContent(){
+  const c=document.getElementById('statsContent')
+  if(!c) return
+  c.innerHTML=`
+    <div style="display:grid;gap:8px">
+      <div>Best Streak: ${stats.best}</div>
+      <div>Total Earned: $${formatNum(stats.earned)}</div>
+      <div>Clicks: ${stats.clicks}</div>
+      <div>Rebirths: ${rebirths}</div>
+      <div>Pets: ${pets.map(p=>p.emoji).join(' ')}</div>
+    </div>
+  `
+  document.getElementById('rebirthBonus').textContent = rebirths*10
+  document.getElementById('rebirthReq').textContent = formatNum(1000000 * Math.pow(2, rebirths))
+}
+
+/* ---------- Visual & Audio Flourish ---------- */
+function spawnParticle(txt){
+  const el=document.createElement('div')
+  el.className='particle'
+  el.style.left=(window.innerWidth/2 + (Math.random()*200-100))+'px'
+  el.style.top=(window.innerHeight/2 + (Math.random()*80-40))+'px'
+  el.textContent=txt
+  document.body.appendChild(el)
+  setTimeout(()=>el.remove(),1100)
+}
+
+function spawnCoinBurst(count){
+  for(let i=0;i<count;i++){
+    const el=document.createElement('div')
+    el.className='coin-particle'
+    el.textContent = '🪙'
+    el.style.left = (window.innerWidth/2 + (Math.random()*220 - 110)) + 'px'
+    el.style.top = (window.innerHeight/2 + (Math.random()*120 - 60)) + 'px'
+    el.style.transform = `rotate(${Math.random()*360}deg)`
+    document.body.appendChild(el)
+    setTimeout(()=>el.remove(),900)
+  }
+}
+
+function spawnPet(){
+  if(pets.length===0) return
+  const p = pets[Math.min(pets.length-1, pets.length-1)]
+  const el=document.createElement('div')
+  el.className='pet'
+  el.textContent=p.emoji
+  el.style.left=(20 + Math.random()*60)+'px'
+  el.style.bottom='80px'
+  document.body.appendChild(el)
+  setTimeout(()=>el.remove(),2000)
+}
+
+function petCelebrate(){
+  // small pet burst from money display
+  const eq = document.getElementById('equippedPet')
+  if(!eq || !eq.textContent) return
+  for(let i=0;i<8;i++){
+    setTimeout(()=>spawnParticle(eq.textContent+' ✨'), i*90)
+  }
+  // small bounce
+  eq.style.transform = 'translateY(-8px)'
+  setTimeout(()=>eq.style.transform = '', 600)
+}
+
+function spawnLaser(){
+  const el=document.createElement('div')
+  el.className='laser'
+  el.style.left=(window.innerWidth/2)+'px'
+  const targetX = window.innerWidth/2 + (Math.random()*300 - 150)
+  const length = Math.abs(targetX - window.innerWidth/2)
+  el.style.setProperty('--laser-length', length+'px')
+  el.style.top=(window.innerHeight/2 + (Math.random()*120-60))+'px'
+  document.body.appendChild(el)
+  setTimeout(()=>el.remove(),420)
+}
+
+function flashChoice(){
+  const el = document.getElementById('computerChoice')
+  el.style.transform = 'scale(1.08)'
+  setTimeout(()=>el.style.transform = '', 160)
+}
+
+/* WebAudio chime (no external assets) */
+let audioCtx = null
+function playChime(){
+  try{
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)()
+    const o = audioCtx.createOscillator()
+    const g = audioCtx.createGain()
+    o.type = 'sine'
+    const now = audioCtx.currentTime
+    o.frequency.setValueAtTime(700, now)
+    o.frequency.exponentialRampToValueAtTime(300, now+0.25)
+    g.gain.setValueAtTime(0.001, now)
+    g.gain.exponentialRampToValueAtTime(0.18, now+0.02)
+    g.gain.exponentialRampToValueAtTime(0.0001, now+0.6)
+    o.connect(g); g.connect(audioCtx.destination)
+    o.start(now); o.stop(now+0.65)
+  }catch(e){
+    // ignore in environments where audio is blocked
+    console.warn('audio error', e)
+  }
+}
+
+/* ---------- Rebirth & Pets Unlock ---------- */
+function doRebirth(){
+  const req = +document.getElementById('rebirthReq').textContent || 1000000
+  if(money < req){
+    spawnParticle('❌ Not enough money to rebirth')
+    return
+  }
+  // On rebirth, give next pet (if available) and increment rebirth count & reset progress
+  rebirths += 1
+  const petIndex = Math.min(rebirths-1, petTypes.length-1)
+  // Avoid duplicate unlocks: only add if not already present by id
+  if(!pets.some(p=>p.id===petTypes[petIndex].id)){
+    pets.push(petTypes[petIndex])
+    // auto-equip first pet if none equipped
+    if(equippedPetIndex < 0) equippedPetIndex = pets.length-1
+  }
+  // reset most progress but keep rebirths and pets/equip
+  money = 0
+  streak = 0
+  streakProtectCharges = 0
+  owned = {}
+  boughtUpgrades = {}
+  stats = {best:stats.best,earned:stats.earned,clicks:0} // preserve best and earned
+  spawnParticle('🔁 Rebirth!')
+  playChime()
+  update()
+  openModal('settings')
+}
+
+/* ---------- Bot Loop ---------- */
+let lastBotTick = Date.now()
+function botTick(){
+  const now = Date.now()
+  const delta = (now - lastBotTick)/1000
+  lastBotTick = now
+  const playsPerSec = calcPlaysPerSecond()
+  const plays = playsPerSec * delta
+  const whole = Math.floor(plays)
+  for(let i=0;i<whole;i++){
+    const players=['rock','paper','scissors']
+    const pick = players[Math.floor(Math.random()*3)]
+    processGame(pick,true)
+  }
+  if(Math.random() < (plays - whole)) {
+    const players=['rock','paper','scissors']
+    const pick = players[Math.floor(Math.random()*3)]
+    processGame(pick,true)
+  }
+  update()
+}
+setInterval(botTick, 1000/2)
+
+/* ---------- Extras ---------- */
+setInterval(()=>{ update() }, 1000)
+
+document.getElementById('autoCollectToggle').checked = autoCollectEnabled
+selectBg(currentBg)
+update()
+
+document.addEventListener('keydown', (e)=>{
+  if(e.key==='1') guess('rock')
+  if(e.key==='2') guess('paper')
+  if(e.key==='3') guess('scissors')
+})
+
+/* ---------- Tooltip ---------- */
+function showTooltip(e, title, desc, cost){
+  const tip=document.getElementById('tooltip')
+  tip.querySelector('.tooltip-title').textContent=title
+  tip.querySelector('.tooltip-desc').textContent=desc
+  tip.querySelector('.tooltip-cost').textContent=cost
+  tip.style.left=(e.clientX+12)+'px'
+  tip.style.top=(e.clientY+12)+'px'
+  tip.classList.add('show')
+}
+function hideTooltip(){ document.getElementById('tooltip').classList.remove('show') }
+
+/* ---------- Modal ---------- */
+function openModal(id){ document.getElementById(id).style.display='flex' }
+function closeModal(id){ document.getElementById(id).style.display='none' }
+
+/* ---------- Initialization ---------- */
+// ensure owned keys exist
+buildings.forEach(b=>owned[b.id]=owned[b.id]||0)
+// ensure pets array items are objects with id/name/emoji
+pets = pets.map(p => (typeof p.id==='number' ? p : petTypes.find(pt=>pt.id===p.id) || p))
+// ensure equipped index valid
+if(equippedPetIndex >= pets.length) equippedPetIndex = pets.length - 1
+update()
+</script>
+</body>
+</html>
