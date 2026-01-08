@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Reverse RPS Incremental</title>
+<title>RPS Incremental Clicker</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
 
@@ -11,244 +11,473 @@
 body{
   font-family:'Inter',sans-serif;
   background:radial-gradient(circle at top,#020617,#000);
-  color:#fff;min-height:100vh
+  color:#fff;
+  min-height:100vh;
+  overflow-x:hidden;
+  transition:background 0.5s;
 }
 #moneyDisplay{
-  position:fixed;top:16px;right:16px;
-  background:linear-gradient(135deg,#10b981,#22c55e);
-  padding:14px 26px;border-radius:999px;
-  font-weight:900;font-size:20px;color:#022c22
+  position:fixed;top:16px;right:16px;background:linear-gradient(135deg,#10b981,#22c55e);
+  padding:14px 26px;border-radius:999px;font-weight:900;font-size:20px;color:#022c22;
+  box-shadow:0 12px 30px rgba(16,185,129,.6);z-index:10;transition:transform .25s;
 }
+.money-pop{transform:scale(1.15);}
 .container{
-  max-width:900px;margin:120px auto;
-  background:#020617cc;padding:36px;
-  border-radius:30px;text-align:center
+  max-width:900px;margin:120px auto;background:#020617cc;backdrop-filter:blur(12px);
+  padding:36px;border-radius:30px;text-align:center;box-shadow:0 50px 120px rgba(0,0,0,.6);
+  position:relative;z-index:5;isolation:isolate;
 }
-.choice{font-size:96px;margin:20px 0}
-.buttons{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+h1{font-size:2.6rem;margin-bottom:20px}
+.choice{font-size:96px;margin:26px 0;cursor:pointer;user-select:none;position:relative;z-index:6;}
+.buttons{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:relative;z-index:10;}
 .buttons button{
-  padding:18px 22px;font-size:18px;
-  font-weight:800;border:none;border-radius:20px;
-  background:#22c55e;color:#fff;cursor:pointer
+  min-width:170px;padding:18px;font-size:18px;font-weight:800;border:none;
+  border-radius:20px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;
+  cursor:pointer;transition:.2s;position:relative;z-index:10;
 }
-.stats{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
-  gap:18px;margin:32px 0
+.buttons button:hover{transform:translateY(-3px) scale(1.06);box-shadow:0 20px 40px rgba(34,197,94,.6);}
+.buttons button:active{transform:translateY(-1px) scale(1.02);}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:18px;margin:32px 0;position:relative;z-index:6;}
+.stat{background:#020617;border:1px solid #1e293b;padding:18px;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;z-index:6;}
+.stat small{color:#94a3b8;font-size:12px;letter-spacing:.08em;margin-bottom:6px;}
+.stat span{font-size:28px;font-weight:900;line-height:1;}
+#cashoutBtn{
+  padding:18px 44px;font-size:20px;font-weight:900;border:none;border-radius:999px;
+  background:linear-gradient(135deg,#f59e0b,#facc15);color:#422006;cursor:pointer;transition:.2s;
+  position:relative;z-index:10;
 }
-.stat{
-  background:#020617;border:1px solid #1e293b;
-  padding:18px;border-radius:20px
-}
-.fixed{
-  position:fixed;bottom:20px;
-  padding:14px 24px;border:none;
-  border-radius:999px;font-weight:800;
-  cursor:pointer;color:white
-}
+#cashoutBtn:hover{transform:scale(1.08)}
+#cashoutBtn:disabled{opacity:.4;cursor:not-allowed}
+.fixed{position:fixed;bottom:20px;padding:14px 24px;border:none;border-radius:999px;font-weight:800;cursor:pointer;color:white;z-index:20;}
 #settingsBtn{left:20px;background:#3b82f6}
 #techBtn{right:160px;background:#8b5cf6}
 #statsBtn{right:20px;background:#0ea5e9}
-.modal{
-  display:none;position:fixed;inset:0;
-  background:rgba(0,0,0,.85);
-  justify-content:center;padding:50px 20px
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);z-index:50;justify-content:center;align-items:flex-start;padding:50px 20px;overflow-y:auto;}
+.modal-box{background:#020617;border:1px solid #1e293b;padding:28px;border-radius:24px;width:90%;max-width:820px;}
+.modal-box h2{text-align:center;margin-bottom:20px;font-size:28px;}
+.modal-box h3{margin:20px 0 12px;font-size:18px;}
+.close{width:100%;padding:14px;margin-top:20px;border-radius:14px;border:none;font-weight:800;cursor:pointer;background:#ef4444;color:white;}
+.settings-grid{display:grid;gap:12px;}
+.settings-grid button{width:100%;padding:16px;border:none;border-radius:12px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;font-weight:800;cursor:pointer;transition:.2s;}
+.settings-grid button:hover{transform:scale(1.02);}
+.buildings-grid{display:grid;gap:12px;}
+.building{background:#0f172a;border:2px solid #1e293b;padding:16px;border-radius:16px;display:flex;align-items:center;cursor:pointer;transition:.2s;}
+.building:hover:not(.disabled){border-color:#22c55e;transform:translateX(5px);box-shadow:0 10px 30px rgba(34,197,94,.3);}
+.building.disabled{opacity:.4;cursor:not-allowed;}
+.building-icon{font-size:48px;margin-right:16px;min-width:60px;text-align:center;}
+.building-info{flex:1;}
+.building-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+.building-name{font-size:18px;font-weight:800;color:#fff;}
+.building-owned{font-size:24px;font-weight:900;color:#22c55e;margin-left:auto;padding-left:12px;}
+.building-desc{color:#94a3b8;font-size:13px;margin-bottom:8px;line-height:1.3;}
+.building-stats{display:flex;justify-content:space-between;align-items:center;}
+.building-cost{font-size:18px;font-weight:900;color:#fbbf24;}
+.building-production{color:#64748b;font-size:13px;}
+.upgrades-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:10px;margin-bottom:20px;}
+.upgrade{
+  aspect-ratio:1;background:linear-gradient(135deg,#1e1b4b,#312e81);border:3px solid #4c1d95;
+  border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;transition:.2s;position:relative;padding:8px;
 }
-.modal-box{
-  background:#020617;padding:28px;
-  border-radius:24px;width:90%;
-  max-width:820px
+.upgrade:hover:not(.disabled){border-color:#8b5cf6;transform:scale(1.05);box-shadow:0 10px 30px rgba(139,92,246,.5);}
+.upgrade.disabled{opacity:.25;cursor:not-allowed;}
+.upgrade.purchased{opacity:.4;border-color:#10b981;cursor:default;}
+.upgrade.purchased::after{content:'✓';position:absolute;top:4px;right:4px;color:#10b981;font-size:16px;font-weight:900;}
+.upgrade-icon{font-size:32px;margin-bottom:4px;}
+.upgrade-cost{font-size:11px;font-weight:800;color:#fbbf24;}
+.tooltip{
+  position:fixed;background:#0f172a;border:2px solid #22c55e;border-radius:12px;padding:12px 16px;
+  pointer-events:none;z-index:100;max-width:300px;box-shadow:0 10px 40px rgba(0,0,0,.8);display:none;
 }
-.close{
-  width:100%;padding:14px;margin-top:20px;
-  border-radius:14px;border:none;
-  font-weight:800;background:#ef4444;
-  color:white;cursor:pointer
-}
-.building{
-  background:#0f172a;border:2px solid #1e293b;
-  padding:16px;border-radius:16px;
-  display:flex;cursor:pointer
-}
-.building.disabled{opacity:.4;cursor:not-allowed}
-.building-icon{font-size:40px;margin-right:16px}
+.tooltip.show{display:block}
+.tooltip-title{font-size:16px;font-weight:800;color:#22c55e;margin-bottom:6px;}
+.tooltip-desc{color:#94a3b8;font-size:13px;line-height:1.4;margin-bottom:8px;}
+.tooltip-cost{color:#fbbf24;font-weight:900;font-size:14px;}
+.particle{position:fixed;pointer-events:none;font-weight:900;animation:float 1s ease forwards;z-index:5;}
+@keyframes float{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-60px)}}
+.pet{position:fixed;font-size:32px;pointer-events:none;z-index:4;transition:transform 0.3s;}
+.laser{position:fixed;height:4px;background:linear-gradient(90deg,#ef4444,#f59e0b,#22c55e);pointer-events:none;z-index:3;animation:laser-shoot 0.4s ease forwards;transform-origin:left center;box-shadow:0 0 20px #ef4444;}
+@keyframes laser-shoot{0%{width:0;opacity:1}100%{width:var(--laser-length);opacity:0}}
+.bg-space{background:radial-gradient(circle at 30% 50%,#1e1b4b,#0c0a1f);}
+.bg-ocean{background:linear-gradient(180deg,#0e7490,#06b6d4,#164e63);}
+.bg-sunset{background:linear-gradient(180deg,#7c2d12,#ea580c,#fb923c);}
+.bg-forest{background:linear-gradient(180deg,#14532d,#166534,#15803d);}
+.bg-neon{background:linear-gradient(45deg,#831843,#be123c,#e11d48,#9333ea);}
+.checkbox{display:inline-flex;align-items:center;gap:8px;cursor:pointer;user-select:none;}
+.checkbox input{width:20px;height:20px;cursor:pointer;}
 </style>
 </head>
-
 <body>
 
 <div id="moneyDisplay">$0</div>
-
 <div class="container">
-  <h1>Reverse Rock Paper Scissors</h1>
-  <div id="computerChoice" class="choice">?</div>
+<h1>Reverse Rock Paper Scissors</h1>
+<div id="computerChoice" class="choice" onclick="quickPlay()">?</div>
+<div class="buttons">
+<button onclick="guess('rock')">✊ Rock</button>
+<button onclick="guess('paper')">✋ Paper</button>
+<button onclick="guess('scissors')">✌️ Scissors</button>
+</div>
 
-  <div class="buttons">
-    <button onclick="guess('rock')">✊ Rock</button>
-    <button onclick="guess('paper')">✋ Paper</button>
-    <button onclick="guess('scissors')">✌️ Scissors</button>
-  </div>
+<div class="stats">
+<div class="stat"><small>STREAK</small><span id="streak">0</span></div>
+<div class="stat"><small>MULTIPLIER</small><span id="mult">x1.00</span></div>
+<div class="stat"><small>CASHOUT</small><span id="cash">$0</span></div>
+<div class="stat"><small>PLAYS/SEC</small><span id="pps">0/s</span></div>
+<div class="stat"><small>LUCK</small><span id="luck">0%</span></div>
+<div class="stat"><small>SHIELDS</small><span id="shields">0</span></div>
+<div class="stat"><small>REBIRTHS</small><span id="rebirths">0</span></div>
+<div class="stat"><small>PETS</small><span id="petCount">0</span></div>
+</div>
 
-  <div class="stats">
-    <div class="stat">STREAK<br><b id="streak">0</b></div>
-    <div class="stat">MULT<br><b id="mult">x1</b></div>
-    <div class="stat">CASHOUT<br><b id="cash">$0</b></div>
-    <div class="stat">P/S<br><b id="pps">0</b></div>
-    <div class="stat">LUCK<br><b id="luck">0%</b></div>
-  </div>
-
-  <button onclick="cashOut()">💰 Cash Out</button>
+<button id="cashoutBtn" onclick="cashOut()">💰 Cash Out</button>
 </div>
 
 <button id="settingsBtn" class="fixed" onclick="openModal('settings')">Rebirth</button>
-<button id="techBtn" class="fixed" onclick="openModal('tech')">Tech</button>
+<button id="techBtn" class="fixed" onclick="openModal('tech')">Tech Tree</button>
 <button id="statsBtn" class="fixed" onclick="openModal('stats')">Stats</button>
 
-<div id="settings" class="modal">
-  <div class="modal-box">
-    <h2>Rebirth</h2>
-    <p>Coming soon.</p>
-    <button class="close" onclick="closeModal('settings')">Close</button>
-  </div>
+<div id="settings" class="modal"><div class="modal-box">
+<h2>⚙️ Settings & Rebirth</h2>
+<h3>Appearance Mode</h3>
+<div class="settings-grid">
+<button onclick="setMode(0)">Emoji Mode</button>
+<button onclick="setMode(1)">Text Mode</button>
+<button onclick="setMode(2)">Objects Mode</button>
 </div>
-
-<div id="tech" class="modal">
-  <div class="modal-box">
-    <h2>Buildings</h2>
-    <div id="buildingsContainer"></div>
-    <button class="close" onclick="closeModal('tech')">Close</button>
-  </div>
+<h3 style="margin-top:20px">Options</h3>
+<label class="checkbox">
+<input type="checkbox" id="autoCollectToggle" onchange="toggleAutoCollect()">
+<span>Enable Auto-Collection</span>
+</label>
+<h3 style="margin-top:20px;color:#f59e0b">Rebirth System</h3>
+<p style="color:#94a3b8;margin-bottom:12px">Reset all progress for permanent bonuses! Each rebirth gives +10% to ALL production and unlocks a new pet companion.</p>
+<div style="background:#0f172a;padding:16px;border-radius:12px;margin-bottom:12px">
+<div style="color:#22c55e;font-weight:800;margin-bottom:8px">Current Rebirth Bonus: +<span id="rebirthBonus">0</span>%</div>
+<div style="color:#8b5cf6">Next Rebirth Requires: $<span id="rebirthReq">1000000</span></div>
 </div>
+<button onclick="doRebirth()" style="width:100%;padding:16px;border:none;border-radius:12px;background:linear-gradient(135deg,#f59e0b,#dc2626);color:white;font-weight:800;cursor:pointer;font-size:16px">🔄 REBIRTH</button>
+<button class="close" onclick="closeModal('settings')">Close</button>
+</div></div>
 
-<div id="stats" class="modal">
-  <div class="modal-box">
-    <div id="statsContent"></div>
-    <button class="close" onclick="closeModal('stats')">Close</button>
-  </div>
+<div id="tech" class="modal"><div class="modal-box">
+<h2>🏪 Tech Tree</h2>
+<h3 style="color:#3b82f6">Backgrounds</h3>
+<div class="buildings-grid" style="margin-bottom:20px">
+<div class="building" onclick="selectBg(0)">
+<div class="building-icon">🌌</div>
+<div class="building-info">
+<div class="building-header"><span class="building-name">Default Space</span></div>
+<div class="building-desc">Classic dark space theme</div>
+<div class="building-stats"><span class="building-cost">FREE</span></div>
+</div>
+</div>
+<div class="building" onclick="buyBg(1)" id="bg1">
+<div class="building-icon">🌊</div>
+<div class="building-info">
+<div class="building-header"><span class="building-name">Ocean Depths</span></div>
+<div class="building-desc">Deep blue underwater vibes</div>
+<div class="building-stats"><span class="building-cost">$500K</span></div>
+</div>
+</div>
+<div class="building" onclick="buyBg(2)" id="bg2">
+<div class="building-icon">🌅</div>
+<div class="building-info">
+<div class="building-header"><span class="building-name">Sunset Sky</span></div>
+<div class="building-desc">Warm orange and red gradients</div>
+<div class="building-stats"><span class="building-cost">$1M</span></div>
+</div>
+</div>
+<div class="building" onclick="buyBg(3)" id="bg3">
+<div class="building-icon">🌲</div>
+<div class="building-info">
+<div class="building-header"><span class="building-name">Forest Grove</span></div>
+<div class="building-desc">Peaceful green nature</div>
+<div class="building-stats"><span class="building-cost">$2M</span></div>
+</div>
+</div>
+<div class="building" onclick="buyBg(4)" id="bg4">
+<div class="building-icon">💫</div>
+<div class="building-info">
+<div class="building-header"><span class="building-name">Neon City</span></div>
+<div class="building-desc">Cyberpunk pink and purple</div>
+<div class="building-stats"><span class="building-cost">$5M</span></div>
+</div>
+</div>
+</div>
+<h3 style="color:#22c55e">Buildings</h3>
+<div id="buildingsContainer" class="buildings-grid"></div>
+<h3 style="color:#8b5cf6">Upgrades</h3>
+<div id="upgradesContainer" class="upgrades-container"></div>
+<button class="close" onclick="closeModal('tech')">Close</button>
+</div></div>
+
+<div id="stats" class="modal"><div class="modal-box">
+<h2>📊 Stats</h2>
+<div id="statsContent"></div>
+<button class="close" onclick="closeModal('stats')">Close</button>
+</div></div>
+
+<div id="tooltip" class="tooltip">
+<div class="tooltip-title"></div>
+<div class="tooltip-desc"></div>
+<div class="tooltip-cost"></div>
 </div>
 
 <script>
-/* ===== DATA ===== */
-const choices = ['rock','paper','scissors'];
+const choices=['rock','paper','scissors']
+const displaySets=[
+  {rock:'✊',paper:'✋',scissors:'✌️'},
+  {rock:'Rock',paper:'Paper',scissors:'Scissors'},
+  {rock:'🪨',paper:'📄',scissors:'✂️'}
+]
 
-let money = +localStorage.getItem('money') || 0;
-let streak = +localStorage.getItem('streak') || 0;
-let owned = JSON.parse(localStorage.getItem('owned')) || { bot:0 };
-let stats = JSON.parse(localStorage.getItem('stats')) || { best:0, earned:0, clicks:0 };
+const buildings=[
+  {id:'bot',name:'Practice Bot',icon:'🤖',baseCost:15,desc:'Plays 1 game per second',isBot:true,speed:1},
+  {id:'grandma',name:'Street Hustler',icon:'👵',baseCost:100,desc:'Plays 5 games per second',isBot:true,speed:5},
+  {id:'coin',name:'Lucky Coin',icon:'🪙',baseCost:500,desc:'Adds 2% win chance',isLuck:true,luck:2},
+  {id:'farm',name:'Training Dojo',icon:'🥋',baseCost:1100,desc:'Plays 8 games per second',isBot:true,speed:8},
+  {id:'collector',name:'Auto Collector',icon:'💎',baseCost:1000,desc:'Auto cashes out at +5 streak per owned',isCollector:true,threshold:5},
+  {id:'mine',name:'Casino Floor',icon:'🎰',baseCost:12000,desc:'Plays 47 games per second',isBot:true,speed:47},
+  {id:'foot',name:'Rabbit Foot',icon:'🐾',baseCost:20000,desc:'Adds 5% win chance',isLuck:true,luck:5},
+  {id:'factory',name:'Bot Swarm',icon:'🏭',baseCost:130000,desc:'Plays 260 games per second',isBot:true,speed:260},
+  {id:'clover',name:'Four-Leaf Clover',icon:'🍀',baseCost:2000000,desc:'Adds 10% win chance',isLuck:true,luck:10},
+]
 
-/* ===== MECHANICS ===== */
+const upgrades=[
+  {id:'streak1',name:'Streak Saver',icon:'🛡️',cost:1000,desc:'First loss doesn\'t reset streak',effect:{streakProtect:1}},
+  {id:'streak2',name:'Double Streak',icon:'⚡',cost:50000,desc:'Earn 2 streak per win',requires:{streak1:true},effect:{streakMult:2}},
+  {id:'streak3',name:'Triple Threat',icon:'💥',cost:500000,desc:'Earn 3 streak per win',requires:{streak2:true},effect:{streakMult:3}},
+  
+  {id:'mult1',name:'Better Math',icon:'📐',cost:5000,desc:'Multiplier formula improved +10%',effect:{multBoost:1.1}},
+  {id:'mult2',name:'Advanced Calculus',icon:'📊',cost:50000,desc:'Multiplier formula improved +20%',requires:{mult1:true},effect:{multBoost:1.2}},
+  {id:'mult3',name:'Quantum Math',icon:'🔬',cost:500000,desc:'Multiplier formula improved +30%',requires:{mult2:true},effect:{multBoost:1.3}},
+  
+  {id:'cash1',name:'Bigger Wallet',icon:'💰',cost:5000,desc:'Cashout value +50%',effect:{cashBoost:1.5}},
+  {id:'cash2',name:'Vault',icon:'🏦',cost:100000,desc:'Cashout value +100%',requires:{cash1:true},effect:{cashBoost:2}},
+  {id:'cash3',name:'Bank Empire',icon:'🏛️',cost:1000000,desc:'Cashout value +150%',requires:{cash2:true},effect:{cashBoost:2.5}},
+  
+  {id:'synergy1',name:'Beginner\'s Luck',icon:'🍀',cost:7777,desc:'All bots +10% efficiency',effect:{allBots:1.1}},
+  {id:'synergy2',name:'Team Spirit',icon:'🤝',cost:77777,desc:'All bots +20% efficiency',requires:{synergy1:true},effect:{allBots:1.2}},
+  {id:'synergy3',name:'Perfect Harmony',icon:'☯️',cost:777777,desc:'All bots +50% efficiency',requires:{synergy2:true},effect:{allBots:1.5}},
+  
+  {id:'auto1',name:'Faster Bots',icon:'⚡',cost:10000,desc:'All bots play 10% faster',effect:{speedBoost:1.1}},
+  {id:'auto2',name:'Turbo Mode',icon:'🚀',cost:250000,desc:'All bots play 25% faster',requires:{auto1:true},effect:{speedBoost:1.25}},
+  {id:'auto3',name:'Hyperspeed',icon:'💨',cost:5000000,desc:'All bots play 50% faster',requires:{auto2:true},effect:{speedBoost:1.5}},
+  
+  {id:'laser',name:'Laser Beam',icon:'🔴',cost:100000,desc:'Epic laser effects on wins!',effect:{hasLaser:true}},
+]
+
+const petTypes=[
+  {id:0,emoji:'🐕',name:'Dog'},
+  {id:1,emoji:'🐈',name:'Cat'},
+  {id:2,emoji:'🐉',name:'Dragon'},
+  {id:3,emoji:'🦄',name:'Unicorn'},
+  {id:4,emoji:'🦊',name:'Fox'},
+  {id:5,emoji:'🐼',name:'Panda'},
+  {id:6,emoji:'🦁',name:'Lion'},
+  {id:7,emoji:'🐯',name:'Tiger'},
+  {id:8,emoji:'🦅',name:'Eagle'},
+  {id:9,emoji:'🐺',name:'Wolf'},
+]
+
+const backgrounds=[
+  {id:0,name:'Default Space',class:''},
+  {id:1,name:'Ocean Depths',class:'bg-ocean',cost:500000},
+  {id:2,name:'Sunset Sky',class:'bg-sunset',cost:1000000},
+  {id:3,name:'Forest Grove',class:'bg-forest',cost:2000000},
+  {id:4,name:'Neon City',class:'bg-neon',cost:5000000},
+]
+
+let mode=+localStorage.getItem('mode')||0
+let money=+localStorage.getItem('money')||0
+let streak=0
+let streakProtectCharges=0
+let owned=JSON.parse(localStorage.getItem('owned'))||{}
+let boughtUpgrades=JSON.parse(localStorage.getItem('upgrades'))||{}
+let stats=JSON.parse(localStorage.getItem('stats'))||{best:0,earned:0,clicks:0}
+let rebirths=+localStorage.getItem('rebirths')||0
+let pets=JSON.parse(localStorage.getItem('pets'))||[]
+let currentBg=+localStorage.getItem('currentBg')||0
+let autoCollectEnabled=localStorage.getItem('autoCollect')!=='false'
+let ownedBackgrounds=JSON.parse(localStorage.getItem('ownedBg'))||[0]
+
+buildings.forEach(b=>owned[b.id]=owned[b.id]||0)
+
 function multiplier(){
-  return 1 + Math.pow(streak,1.35)/12;
+  let base=1+Math.pow(streak,1.4)/10
+  Object.keys(boughtUpgrades).forEach(upId=>{
+    const up=upgrades.find(u=>u.id===upId)
+    if(up&&up.effect&&up.effect.multBoost){
+      base*=up.effect.multBoost
+    }
+  })
+  return base
 }
+
 function payout(){
-  return Math.floor(streak * 20 * multiplier());
-}
-function luck(){
-  return Math.min(owned.bot * 2, 40);
-}
-function playsPerSecond(){
-  return owned.bot;
-}
-
-/* ===== GAME LOGIC ===== */
-function reverseWin(player, comp){
-  return (
-    (player==='rock' && comp==='paper') ||
-    (player==='paper' && comp==='scissors') ||
-    (player==='scissors' && comp==='rock')
-  );
+  let base=Math.floor(streak*20*multiplier())
+  Object.keys(boughtUpgrades).forEach(upId=>{
+    const up=upgrades.find(u=>u.id===upId)
+    if(up&&up.effect&&up.effect.cashBoost){
+      base*=up.effect.cashBoost
+    }
+  })
+  return Math.floor(base)
 }
 
-function process(player){
-  let comp = choices[Math.floor(Math.random()*3)];
-  if(Math.random()*100 < luck()){
-    comp = choices[(choices.indexOf(player)+1)%3];
-  }
-  if(reverseWin(player,comp)) streak++;
-  else streak = 0;
-
-  stats.best = Math.max(stats.best, streak);
-  computerChoice.textContent = comp;
+function calcPlaysPerSecond(){
+  let total=0
+  let allBotsMultiplier=1
+  let speedBoost=1
+  
+  Object.keys(boughtUpgrades).forEach(upId=>{
+    const up=upgrades.find(u=>u.id===upId)
+    if(up&&up.effect&&up.effect.allBots){
+      allBotsMultiplier*=up.effect.allBots
+    }
+    if(up&&up.effect&&up.effect.speedBoost){
+      speedBoost*=up.effect.speedBoost
+    }
+  })
+  
+  const rebirthBonus=1+(rebirths*0.1)
+  
+  buildings.forEach(b=>{
+    if(!b.isBot)return
+    total+=(b.speed||1)*owned[b.id]*allBotsMultiplier*speedBoost*rebirthBonus
+  })
+  return total
 }
 
-/* ===== PLAYER ===== */
-function guess(choice){
-  stats.clicks++;
-  process(choice);
-  update();
+function calcLuck(){
+  let total=0
+  buildings.forEach(b=>{
+    if(b.isLuck){
+      total+=(b.luck||0)*owned[b.id]
+    }
+  })
+  return Math.min(total,95)
 }
 
-function cashOut(){
-  if(streak < 1) return;
-  let gain = payout();
-  money += gain;
-  stats.earned += gain;
-  streak = 0;
-  update();
+function getAutoCollectThreshold(){
+  if(!autoCollectEnabled)return 0
+  let total=5*owned['collector']
+  return total
 }
 
-/* ===== BUILDINGS ===== */
-function renderBuildings(){
-  buildingsContainer.innerHTML='';
-  let cost = Math.floor(25 * Math.pow(1.15, owned.bot));
-  let canBuy = money >= cost;
-
-  let div = document.createElement('div');
-  div.className = 'building'+(canBuy?'':' disabled');
-  div.innerHTML = `
-    <div class="building-icon">🤖</div>
-    <div>Practice Bot<br>Cost: $${cost}<br>Owned: ${owned.bot}</div>
-  `;
-  div.onclick = ()=>{
-    if(!canBuy) return;
-    money -= cost;
-    owned.bot++;
-    renderBuildings();
-    update();
-  };
-  buildingsContainer.appendChild(div);
+function getCost(b){
+  return Math.floor(b.baseCost*Math.pow(1.15,owned[b.id]))
 }
 
-/* ===== UI ===== */
 function update(){
-  streakEl.textContent = streak;
-  multEl.textContent = 'x'+multiplier().toFixed(2);
-  cashEl.textContent = '$'+payout();
-  ppsEl.textContent = playsPerSecond();
-  luckEl.textContent = luck()+'%';
-  moneyDisplay.textContent = '$'+money;
-
-  localStorage.setItem('money', money);
-  localStorage.setItem('streak', streak);
-  localStorage.setItem('owned', JSON.stringify(owned));
-  localStorage.setItem('stats', JSON.stringify(stats));
-}
-
-function openModal(id){
-  document.getElementById(id).style.display='flex';
-  if(id==='tech') renderBuildings();
-  if(id==='stats'){
-    statsContent.innerHTML =
-      `Best Streak: ${stats.best}<br>Total Earned: $${stats.earned}`;
+  document.getElementById('streak').textContent=streak
+  document.getElementById('mult').textContent='x'+multiplier().toFixed(2)
+  document.getElementById('cash').textContent='$'+formatNum(payout())
+  document.getElementById('pps').textContent=formatNum(calcPlaysPerSecond())+'/s'
+  document.getElementById('luck').textContent=calcLuck()+'%'
+  document.getElementById('shields').textContent=streakProtectCharges
+  document.getElementById('rebirths').textContent=rebirths
+  document.getElementById('petCount').textContent=pets.length
+  
+  const m=document.getElementById('moneyDisplay')
+  m.textContent='$'+formatNum(money)
+  m.classList.add('money-pop')
+  setTimeout(()=>m.classList.remove('money-pop'),200)
+  
+  document.getElementById('cashoutBtn').disabled=streak<1
+  
+  for(let i=1;i<=4;i++){
+    const elem=document.getElementById('bg'+i)
+    if(elem){
+      if(ownedBackgrounds.includes(i)){
+        elem.classList.remove('disabled')
+      }else{
+        elem.classList.add('disabled')
+      }
+    }
   }
 }
-function closeModal(id){
-  document.getElementById(id).style.display='none';
+
+function formatNum(n){
+  if(n>=1e9)return(n/1e9).toFixed(2)+'B'
+  if(n>=1e6)return(n/1e6).toFixed(2)+'M'
+  if(n>=1e3)return(n/1e3).toFixed(1)+'K'
+  return Math.floor(n)
 }
 
-/* ===== BOT LOOP ===== */
-setInterval(()=>{
-  for(let i=0;i<playsPerSecond();i++){
-    process(choices[Math.floor(Math.random()*3)]);
-    if(streak > 10) cashOut();
-  }
-  update();
-},1000);
+function roll(final){
+  const elem=document.getElementById('computerChoice')
+  let i=0
+  const frames=['✊','✋','✌️']
+  const interval=setInterval(()=>{
+    elem.textContent=frames[i++%3]
+  },80)
+  setTimeout(()=>{
+    clearInterval(interval)
+    elem.textContent=final
+  },600)
+}
 
-/* ===== INIT ===== */
-const streakEl = document.getElementById('streak');
-const multEl = document.getElementById('mult');
-const cashEl = document.getElementById('cash');
-const ppsEl = document.getElementById('pps');
-const luckEl = document.getElementById('luck');
-const money
+function processGame(player,isBot){
+  const comp=choices[Math.floor(Math.random()*3)]
+  
+  if(player===comp){
+    return comp
+  }
+  
+  let win=
+    (player==='rock'&&comp==='paper')||
+    (player==='paper'&&comp==='scissors')||
+    (player==='scissors'&&comp==='rock')
+
+  if(!win){
+    const luckChance=calcLuck()
+    if(Math.random()*100<luckChance){
+      win=true
+      if(!isBot)spawnParticle('🍀 LUCKY!')
+    }
+  }
+
+  if(win){
+    let streakGain=1
+    Object.keys(boughtUpgrades).forEach(upId=>{
+      const up=upgrades.find(u=>u.id===upId)
+      if(up&&up.effect&&up.effect.streakMult){
+        streakGain=up.effect.streakMult
+      }
+    })
+    
+    streak+=streakGain
+    if(!isBot){
+      stats.clicks++
+      if(streakGain>1){
+        spawnParticle(`+${streakGain} STREAK!`)
+      }
+    }
+  }else{
+    if(streakProtectCharges>0){
+      streakProtectCharges--
+      if(!isBot)spawnParticle('🛡️ PROTECTED!')
+    }else{
+      streak=0
+    }
+  }
+
+  stats.best=Math.max(stats.best,streak)
+  localStorage.setItem('money',money)
+  localStorage.setItem('stats',JSON.stringify(stats))
+  
+  const threshold=getAutoCollectThreshold()
+  if(threshold>0&&streak>=threshold){
+    cashOut(true)
+  }
+  
+  return comp
+}
+
+function guess(player){
+  const comp=processGame(player,false)
+  roll(displaySets[mode][comp])
+  
+  if(boughtUpgrades['laser']&&((player
