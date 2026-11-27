@@ -91,9 +91,9 @@
 </section>
 
 <script>
-const CRITERIA = ["Creativity", "Teamwork", "Stage presence", "Skill", "Entertainment"];
-const PROMPTS = ["Dance", "Comedy", "Singing", "Magic", "Acting"];
-const KEY = "talentBuzzerV1";
+const CRITERIA = ["Creativity", "Teamwork", "Skill", "Entertainment"];
+const PROMPTS = ["Dance", "Comedy", "Magic", "Acting", "Miming"];
+const KEY = "talentBuzzerV2";
 
 function fresh() {
   return PROMPTS.map((p, i) => ({ name: "Group " + (i + 1), prompt: p, scores: CRITERIA.map(() => 0) }));
@@ -115,27 +115,33 @@ document.getElementById("tabJudge").onclick = () => show("judge");
 
 /* Buzzer sound */
 let ctx;
+function getCtx() {
+  ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+  if (ctx.state !== "running") ctx.resume();
+  return ctx;
+}
 function buzz() {
   const flash = document.getElementById("flash");
   flash.classList.remove("on"); void flash.offsetWidth; flash.classList.add("on");
   try {
-    ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
-    if (ctx.state === "suspended") ctx.resume();
-    const t = ctx.currentTime, g = ctx.createGain();
-    g.gain.setValueAtTime(0.5, t);
-    g.gain.setValueAtTime(0.5, t + 0.9);
-    g.gain.exponentialRampToValueAtTime(0.001, t + 1.1);
-    g.connect(ctx.destination);
-    [110, 116, 220].forEach(f => {
-      const o = ctx.createOscillator();
-      o.type = "sawtooth"; o.frequency.value = f;
-      o.connect(g); o.start(t); o.stop(t + 1.1);
+    const c = getCtx(), t = c.currentTime;
+    const comp = c.createDynamicsCompressor();
+    const g = c.createGain();
+    g.gain.setValueAtTime(1, t);
+    g.gain.setValueAtTime(1, t + 1.0);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 1.25);
+    g.connect(comp); comp.connect(c.destination);
+    [[150, "sawtooth"], [156, "sawtooth"], [300, "square"], [450, "sawtooth"]].forEach(([f, type]) => {
+      const o = c.createOscillator(), og = c.createGain();
+      o.type = type; o.frequency.value = f; og.gain.value = 0.3;
+      o.connect(og); og.connect(g); o.start(t); o.stop(t + 1.25);
     });
   } catch (e) {}
   if (navigator.vibrate) navigator.vibrate(200);
 }
 const b = document.getElementById("buzzer");
-b.addEventListener("pointerdown", buzz);
+b.addEventListener("pointerdown", () => { buzz(); b.blur(); });
+["pointerdown", "keydown"].forEach(ev => document.addEventListener(ev, () => { try { getCtx(); } catch (e) {} }, { once: true }));
 document.addEventListener("keydown", e => {
   if (e.code === "Space" && document.getElementById("buzz").classList.contains("active") && !e.repeat) {
     e.preventDefault(); b.classList.add("down"); buzz();
@@ -182,6 +188,7 @@ document.getElementById("reset").onclick = () => {
   if (confirm("Reset all names, prompts and scores?")) { data = fresh(); save(); renderGroups(); renderBoard(); }
 };
 renderGroups(); renderBoard();
+
 </script>
 </body>
 </html>
