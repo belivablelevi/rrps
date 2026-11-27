@@ -66,16 +66,7 @@
   th { color: var(--muted); font-weight: 600; font-size: 13px; }
   td.r { font-weight: 800; color: var(--gold); }
   .reset { margin-top: 10px; background: none; border: 1px solid rgba(255,255,255,.2); color: var(--muted); border-radius: 8px; padding: 8px 14px; cursor: pointer; }
-  #props { padding: 70px 16px 40px; }
-  #props .wrap { max-width: 700px; margin: 0 auto; }
-  .row { display: flex; gap: 8px; margin-bottom: 12px; }
-  .btn { background: var(--red); color: #fff; border: none; border-radius: 8px; padding: 8px 18px; font-size: 15px; font-weight: 600; cursor: pointer; }
-  .btn.big { font-size: 18px; padding: 12px 24px; }
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-  .chip { background: #0e0e16; border: 1px solid rgba(255,255,255,.18); border-radius: 999px; padding: 6px 8px 6px 14px; display: flex; align-items: center; gap: 8px; font-size: 15px; }
-  .chip button { background: rgba(255,255,255,.1); border: none; color: var(--muted); width: 22px; height: 22px; border-radius: 50%; cursor: pointer; line-height: 1; }
-  .pick { text-align: center; }
-  #picked { font-size: 34px; font-weight: 800; color: var(--gold); margin-top: 14px; min-height: 48px; }
+  textarea { width: 100%; background: #0e0e16; color: var(--text); border: 1px solid rgba(255,255,255,.18); border-radius: 8px; padding: 8px 10px; font: inherit; font-size: 15px; resize: vertical; margin-top: 6px; }
   @media (max-width: 560px) { .crit { grid-template-columns: 100px 1fr 30px; } .names { grid-template-columns: 1fr; } }
 </style>
 </head>
@@ -83,7 +74,6 @@
 <nav>
   <button id="tabBuzz" class="active">Buzzer</button>
   <button id="tabJudge">Judging</button>
-  <button id="tabProps">Props</button>
 </nav>
 
 <div id="flash"></div>
@@ -95,28 +85,14 @@
 <section id="judge">
   <h2>Group Scoring</h2>
   <p class="hint">Edit each group's name and prompt, then rate each group from 0 to 10. Scores save automatically on this device.</p>
+  <div class="card">
+    <h3>📝 Props Box</h3>
+    <textarea id="propsNote" rows="3" placeholder="Props available..."></textarea>
+  </div>
   <div id="groups"></div>
   <h2>Leaderboard</h2>
   <div class="card"><table id="board"></table></div>
   <button class="reset" id="reset">Reset all scores</button>
-</section>
-
-<section id="props">
-  <div class="wrap">
-    <h2>Props Box</h2>
-    <p class="hint">Props groups can use in their act. Add your own, remove ones you don't need, or pull a random one.</p>
-    <div class="card">
-      <div class="row">
-        <input type="text" id="newProp" placeholder="Add a prop (e.g. umbrella)">
-        <button class="btn" id="addProp">Add</button>
-      </div>
-      <div id="propList" class="chips"></div>
-    </div>
-    <div class="card pick">
-      <button class="btn big" id="randProp">🎁 Pull a random prop</button>
-      <div id="picked">?</div>
-    </div>
-  </div>
 </section>
 
 <script>
@@ -136,14 +112,11 @@ function save() { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch
 function show(which) {
   document.getElementById("buzz").classList.toggle("active", which === "buzz");
   document.getElementById("judge").classList.toggle("active", which === "judge");
-  document.getElementById("props").classList.toggle("active", which === "props");
-  document.getElementById("tabProps").classList.toggle("active", which === "props");
   document.getElementById("tabBuzz").classList.toggle("active", which === "buzz");
   document.getElementById("tabJudge").classList.toggle("active", which === "judge");
 }
 document.getElementById("tabBuzz").onclick = () => show("buzz");
 document.getElementById("tabJudge").onclick = () => show("judge");
-document.getElementById("tabProps").onclick = () => show("props");
 
 /* Buzzer sound */
 let ctx;
@@ -215,29 +188,6 @@ document.getElementById("reset").onclick = () => {
 };
 renderGroups(); renderBoard();
 
-/* Props box */
-const PKEY = "talentBuzzerProps";
-const DEFAULT_PROPS = ["Deck of cards", "Hat", "Scarf", "Umbrella", "Rubber duck", "Flashlight", "Balloon", "Sunglasses"];
-let props;
-try { props = JSON.parse(localStorage.getItem(PKEY)); } catch (e) {}
-if (!Array.isArray(props)) props = DEFAULT_PROPS.slice();
-function saveProps() { try { localStorage.setItem(PKEY, JSON.stringify(props)); } catch (e) {} }
-function renderProps() {
-  const el = document.getElementById("propList");
-  el.innerHTML = props.map((p, i) => "<span class='chip'>" + esc(p) + "<button data-i='" + i + "' aria-label='Remove'>×</button></span>").join("") || "<span class='hint'>No props yet.</span>";
-  el.querySelectorAll("button").forEach(btn => btn.onclick = () => { props.splice(+btn.dataset.i, 1); saveProps(); renderProps(); });
-}
-function addProp() {
-  const inp = document.getElementById("newProp"), v = inp.value.trim();
-  if (!v) return;
-  props.push(v); inp.value = ""; saveProps(); renderProps();
-}
-document.getElementById("addProp").onclick = addProp;
-document.getElementById("newProp").addEventListener("keydown", e => { if (e.key === "Enter") addProp(); });
-document.getElementById("randProp").onclick = () => {
-  document.getElementById("picked").textContent = props.length ? props[Math.floor(Math.random() * props.length)] : "Box is empty!";
-};
-renderProps();
 </script>
 </body>
 </html>
