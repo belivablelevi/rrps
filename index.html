@@ -66,7 +66,6 @@
   th { color: var(--muted); font-weight: 600; font-size: 13px; }
   td.r { font-weight: 800; color: var(--gold); }
   .reset { margin-top: 10px; background: none; border: 1px solid rgba(255,255,255,.2); color: var(--muted); border-radius: 8px; padding: 8px 14px; cursor: pointer; }
-  textarea { width: 100%; background: #0e0e16; color: var(--text); border: 1px solid rgba(255,255,255,.18); border-radius: 8px; padding: 8px 10px; font: inherit; font-size: 15px; resize: vertical; margin-top: 6px; }
   @media (max-width: 560px) { .crit { grid-template-columns: 100px 1fr 30px; } .names { grid-template-columns: 1fr; } }
 </style>
 </head>
@@ -85,10 +84,6 @@
 <section id="judge">
   <h2>Group Scoring</h2>
   <p class="hint">Edit each group's name and prompt, then rate each group from 0 to 10. Scores save automatically on this device.</p>
-  <div class="card">
-    <h3>📝 Props Box</h3>
-    <textarea id="propsNote" rows="3" placeholder="Props available..."></textarea>
-  </div>
   <div id="groups"></div>
   <h2>Leaderboard</h2>
   <div class="card"><table id="board"></table></div>
