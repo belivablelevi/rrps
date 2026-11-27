@@ -2,926 +2,186 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>RPS Incremental Clicker</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
-
+<title>Talent Buzzer</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{
-  font-family:'Inter',sans-serif;
-  background:radial-gradient(circle at top,#020617,#000);
-  color:#fff;
-  min-height:100vh;
-  overflow-x:hidden;
-  transition:background 0.5s;
-}
-#moneyDisplay{
-  position:fixed;top:16px;right:16px;background:linear-gradient(135deg,#10b981,#22c55e);
-  padding:14px 26px;border-radius:999px;font-weight:900;font-size:20px;color:#022c22;
-  box-shadow:0 12px 30px rgba(16,185,129,.6);z-index:10;transition:transform .25s;
-  display:flex;align-items:center;gap:10px;
-}
-.money-pop{transform:scale(1.15);}
+  :root { --red:#d52b1e; --dark:#0b0b12; --gold:#f5c542; --card:#16161f; --text:#f4f4f8; --muted:#9a9ab0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: var(--text);
+    background:
+      radial-gradient(ellipse at 20% 0%, rgba(213,43,30,.45), transparent 55%),
+      radial-gradient(ellipse at 80% 0%, rgba(245,197,66,.25), transparent 50%),
+      linear-gradient(#14141f, var(--dark));
+    background-attachment: fixed;
+    overflow-x: hidden;
+  }
+  nav { position: fixed; top: 0; left: 0; right: 0; display: flex; justify-content: center; gap: 8px; padding: 14px; z-index: 5; }
+  nav button {
+    background: rgba(255,255,255,.08); color: var(--text); border: 1px solid rgba(255,255,255,.15);
+    padding: 8px 20px; border-radius: 999px; font-size: 15px; cursor: pointer;
+  }
+  nav button.active { background: var(--red); border-color: var(--red); }
+  section { display: none; min-height: 100%; }
+  section.active { display: block; }
 
-.coin-particle{
-  position:fixed;pointer-events:none;font-weight:900;animation:coinFloat 1s ease forwards;z-index:60;
-  font-size:18px;
-}
-@keyframes coinFloat{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-80px) scale(.5)}}
+  /* Buzzer page */
+  #buzz { display: none; place-items: center; height: 100%; }
+  #buzz.active { display: grid; }
+  #buzzer {
+    width: min(70vw, 60vh, 420px); aspect-ratio: 1; border-radius: 50%; border: none; cursor: pointer;
+    background: radial-gradient(circle at 35% 30%, #ff6a5c, var(--red) 45%, #8e130a);
+    box-shadow: 0 14px 0 #5c0b05, 0 30px 60px rgba(0,0,0,.6), inset 0 -10px 30px rgba(0,0,0,.3);
+    color: #fff; font-size: min(30vw, 22vh, 180px); font-weight: 900; line-height: 1;
+    transition: transform .06s, box-shadow .06s;
+    -webkit-tap-highlight-color: transparent; user-select: none;
+  }
+  #buzzer:active, #buzzer.down { transform: translateY(12px); box-shadow: 0 2px 0 #5c0b05, 0 12px 30px rgba(0,0,0,.6), inset 0 -10px 30px rgba(0,0,0,.3); }
+  #flash { position: fixed; inset: 0; background: var(--red); opacity: 0; pointer-events: none; z-index: 4; }
+  #flash.on { animation: flash .6s ease-out; }
+  @keyframes flash { 0% { opacity: .85; } 100% { opacity: 0; } }
 
-.container{
-  max-width:900px;margin:120px auto;background:#020617cc;backdrop-filter:blur(12px);
-  padding:36px;border-radius:30px;text-align:center;box-shadow:0 50px 120px rgba(0,0,0,.6);
-  position:relative;z-index:5;isolation:isolate;
-}
-h1{font-size:2.6rem;margin-bottom:20px}
-.choice{font-size:96px;margin:26px 0;cursor:pointer;user-select:none;position:relative;z-index:6;}
-.buttons{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:relative;z-index:10;}
-.buttons button{
-  min-width:170px;padding:18px;font-size:18px;font-weight:800;border:none;
-  border-radius:20px;background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff;
-  cursor:pointer;transition:.2s;position:relative;z-index:10;
-}
-.buttons button:hover{transform:translateY(-3px) scale(1.06);box-shadow:0 20px 40px rgba(34,197,94,.6);}
-.buttons button:active{transform:translateY(-1px) scale(1.02);}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:18px;margin:32px 0;position:relative;z-index:6;}
-.stat{background:#020617;border:1px solid #1e293b;padding:18px;border-radius:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;z-index:6;}
-.stat small{color:#94a3b8;font-size:12px;letter-spacing:.08em;margin-bottom:6px;}
-.stat span{font-size:28px;font-weight:900;line-height:1;}
-#cashoutBtn{
-  padding:18px 44px;font-size:20px;font-weight:900;border:none;border-radius:999px;
-  background:linear-gradient(135deg,#f59e0b,#facc15);color:#422006;cursor:pointer;transition:.2s;
-  position:relative;z-index:10;
-}
-#cashoutBtn:hover{transform:scale(1.08)}
-#cashoutBtn:disabled{opacity:.4;cursor:not-allowed}
-.fixed{position:fixed;bottom:20px;padding:14px 24px;border:none;border-radius:999px;font-weight:800;cursor:pointer;color:white;z-index:20;}
-#settingsBtn{left:20px;background:#3b82f6}
-#techBtn{right:160px;background:#8b5cf6}
-#statsBtn{right:20px;background:#0ea5e9}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);z-index:50;justify-content:center;align-items:flex-start;padding:50px 20px;overflow-y:auto;}
-.modal-box{background:#020617;border:1px solid #1e293b;padding:28px;border-radius:24px;width:90%;max-width:820px;}
-.modal-box h2{text-align:center;margin-bottom:20px;font-size:28px;}
-.modal-box h3{margin:20px 0 12px;font-size:18px;}
-.close{width:100%;padding:14px;margin-top:20px;border-radius:14px;border:none;font-weight:800;cursor:pointer;background:#ef4444;color:white;}
-.settings-grid{display:grid;gap:12px;}
-.settings-grid button{width:100%;padding:16px;border:none;border-radius:12px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:white;font-weight:800;cursor:pointer;transition:.2s;}
-.settings-grid button:hover{transform:scale(1.02);}
-.buildings-grid{display:grid;gap:12px;}
-.building{background:#0f172a;border:2px solid #1e293b;padding:16px;border-radius:16px;display:flex;align-items:center;cursor:pointer;transition:.2s;}
-.building:hover:not(.disabled){border-color:#22c55e;transform:translateX(5px);box-shadow:0 10px 30px rgba(34,197,94,.3);}
-.building.disabled{opacity:.4;cursor:not-allowed;}
-.building-icon{font-size:48px;margin-right:16px;min-width:60px;text-align:center;}
-.building-info{flex:1;}
-.building-header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
-.building-name{font-size:18px;font-weight:800;color:#fff;}
-.building-owned{font-size:24px;font-weight:900;color:#22c55e;margin-left:auto;padding-left:12px;}
-.building-desc{color:#94a3b8;font-size:13px;margin-bottom:8px;line-height:1.3;}
-.building-stats{display:flex;justify-content:space-between;align-items:center;}
-.building-cost{font-size:18px;font-weight:900;color:#fbbf24;}
-.building-production{color:#64748b;font-size:13px;}
-.upgrades-container{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:10px;margin-bottom:20px;}
-.upgrade{
-  aspect-ratio:1;background:linear-gradient(135deg,#1e1b4b,#312e81);border:3px solid #4c1d95;
-  border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  cursor:pointer;transition:.2s;position:relative;padding:8px;
-}
-.upgrade:hover:not(.disabled){border-color:#8b5cf6;transform:scale(1.05);box-shadow:0 10px 30px rgba(139,92,246,.5);}
-.upgrade.disabled{opacity:.25;cursor:not-allowed;}
-.upgrade.purchased{opacity:.4;border-color:#10b981;cursor:default;}
-.upgrade.purchased::after{content:'✓';position:absolute;top:4px;right:4px;color:#10b981;font-size:16px;font-weight:900;}
-.upgrade-icon{font-size:32px;margin-bottom:4px;}
-.upgrade-cost{font-size:11px;font-weight:800;color:#fbbf24;}
-.tooltip{
-  position:fixed;background:#0f172a;border:2px solid #22c55e;border-radius:12px;padding:12px 16px;
-  pointer-events:none;z-index:100;max-width:300px;box-shadow:0 10px 40px rgba(0,0,0,.8);display:none;
-}
-.tooltip.show{display:block}
-.tooltip-title{font-size:16px;font-weight:800;color:#22c55e;margin-bottom:6px;}
-.tooltip-desc{color:#94a3b8;font-size:13px;line-height:1.4;margin-bottom:8px;}
-.tooltip-cost{color:#fbbf24;font-weight:900;font-size:14px;}
-.particle{position:fixed;pointer-events:none;font-weight:900;animation:float 1s ease forwards;z-index:5;}
-@keyframes float{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-60px)}}
-.pet{position:fixed;font-size:32px;pointer-events:none;z-index:4;transition:transform 0.3s;}
-.laser{position:fixed;height:4px;background:linear-gradient(90deg,#ef4444,#f59e0b,#22c55e);pointer-events:none;z-index:3;animation:laser-shoot 0.4s ease forwards;transform-origin:left center;box-shadow:0 6px 18px rgba(255,120,80,.6);border-radius:4px;}
-@keyframes laser-shoot{0%{width:0;opacity:1}100%{width:var(--laser-length);opacity:0}}
-.bg-space{background:radial-gradient(circle at 30% 50%,#1e1b4b,#0c0a1f);}
-.bg-ocean{background:linear-gradient(180deg,#0e7490,#06b6d4,#164e63);}
-.bg-sunset{background:linear-gradient(180deg,#7c2d12,#ea580c,#fb923c);}
-.bg-forest{background:linear-gradient(180deg,#14532d,#166534,#15803d);}
-.bg-neon{background:linear-gradient(45deg,#831843,#be123c,#e11d48,#9333ea);}
-.checkbox{display:inline-flex;align-items:center;gap:8px;cursor:pointer;user-select:none;}
-.checkbox input{width:20px;height:20px;cursor:pointer;}
-
-/* small UI for pets inside money display */
-#equippedPet{font-size:22px;opacity:.95;transform-origin:center center;}
-.equippedPulse{animation:equipPulse .9s ease}
-@keyframes equipPulse{0%{transform:scale(1)}30%{transform:scale(1.35)}100%{transform:scale(1)}}
+  /* Judging page */
+  #judge { padding: 70px 16px 40px; max-width: 1000px; margin: 0 auto; }
+  h2 { font-size: 22px; margin: 18px 0 10px; }
+  .hint { color: var(--muted); font-size: 14px; margin-bottom: 10px; }
+  .card { background: var(--card); border: 1px solid rgba(255,255,255,.08); border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+  .card h3 { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; font-size: 18px; }
+  .card h3 .n { background: var(--red); border-radius: 50%; width: 28px; height: 28px; display: grid; place-items: center; font-size: 14px; flex: none; }
+  input[type=text] {
+    background: #0e0e16; color: var(--text); border: 1px solid rgba(255,255,255,.18); border-radius: 8px;
+    padding: 8px 10px; font-size: 15px; width: 100%;
+  }
+  .names { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 8px 0 12px; }
+  .names label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 3px; }
+  .crit { display: grid; grid-template-columns: 130px 1fr 34px; align-items: center; gap: 10px; padding: 5px 0; font-size: 15px; }
+  .crit output { text-align: right; font-weight: 700; color: var(--gold); }
+  input[type=range] { width: 100%; accent-color: var(--red); }
+  .total { text-align: right; font-size: 18px; margin-top: 8px; }
+  .total b { color: var(--gold); font-size: 24px; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid rgba(255,255,255,.08); font-size: 15px; }
+  th { color: var(--muted); font-weight: 600; font-size: 13px; }
+  td.r { font-weight: 800; color: var(--gold); }
+  .reset { margin-top: 10px; background: none; border: 1px solid rgba(255,255,255,.2); color: var(--muted); border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+  @media (max-width: 560px) { .crit { grid-template-columns: 100px 1fr 30px; } .names { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
+<nav>
+  <button id="tabBuzz" class="active">Buzzer</button>
+  <button id="tabJudge">Judging</button>
+</nav>
 
-<div id="moneyDisplay"><div id="equippedPet"></div><div id="moneyText">$0</div></div>
-<div class="container" id="mainContainer">
-<h1>Reverse Rock Paper Scissors</h1>
-<div id="computerChoice" class="choice" onclick="quickPlay()">?</div>
-<div class="buttons">
-<button onclick="guess('rock')">✊ Rock</button>
-<button onclick="guess('paper')">✋ Paper</button>
-<button onclick="guess('scissors')">✌️ Scissors</button>
-</div>
+<div id="flash"></div>
 
-<div class="stats">
-<div class="stat"><small>STREAK</small><span id="streak">0</span></div>
-<div class="stat"><small>MULTIPLIER</small><span id="mult">x1.00</span></div>
-<div class="stat"><small>CASHOUT</small><span id="cash">$0</span></div>
-<div class="stat"><small>PLAYS/SEC</small><span id="pps">0/s</span></div>
-<div class="stat"><small>LUCK</small><span id="luck">0%</span></div>
-<div class="stat"><small>SHIELDS</small><span id="shields">0</span></div>
-<div class="stat"><small>REBIRTHS</small><span id="rebirths">0</span></div>
-<div class="stat"><small>PETS</small><span id="petCount">0</span></div>
-</div>
+<section id="buzz" class="active">
+  <button id="buzzer" aria-label="Buzzer">✕</button>
+</section>
 
-<button id="cashoutBtn" onclick="cashOut()">💰 Cash Out</button>
-</div>
-
-<button id="settingsBtn" class="fixed" onclick="openModal('settings')">Rebirth</button>
-<button id="techBtn" class="fixed" onclick="openModal('tech')">Tech Tree</button>
-<button id="statsBtn" class="fixed" onclick="openModal('stats')">Stats</button>
-
-<div id="settings" class="modal"><div class="modal-box">
-<h2>⚙️ Settings & Rebirth</h2>
-<h3>Appearance Mode</h3>
-<div class="settings-grid">
-<button onclick="setMode(0)">Emoji Mode</button>
-<button onclick="setMode(1)">Text Mode</button>
-<button onclick="setMode(2)">Objects Mode</button>
-</div>
-<h3 style="margin-top:20px">Options</h3>
-<label class="checkbox">
-<input type="checkbox" id="autoCollectToggle" onchange="toggleAutoCollect()">
-<span>Enable Auto-Collection</span>
-</label>
-
-<h3 style="margin-top:20px">Pets</h3>
-<p style="color:#94a3b8;margin-bottom:8px">Pets are unlocked on rebirth. Equip a pet for small visual flair and bonus animations.</p>
-<div id="petsContainer" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:12px"></div>
-
-<h3 style="margin-top:20px;color:#f59e0b">Rebirth System</h3>
-<p style="color:#94a3b8;margin-bottom:12px">Reset all progress for permanent bonuses! Each rebirth gives +10% to ALL production and unlocks a new pet companion.</p>
-<div style="background:#0f172a;padding:16px;border-radius:12px;margin-bottom:12px">
-<div style="color:#22c55e;font-weight:800;margin-bottom:8px">Current Rebirth Bonus: +<span id="rebirthBonus">0</span>%</div>
-<div style="color:#8b5cf6">Next Rebirth Requires: $<span id="rebirthReq">1000000</span></div>
-</div>
-<button onclick="doRebirth()" style="width:100%;padding:16px;border:none;border-radius:12px;background:linear-gradient(135deg,#f59e0b,#dc2626);color:white;font-weight:800;cursor:pointer;font-size:16px">Rebirth Now</button>
-<button class="close" onclick="closeModal('settings')">Close</button>
-</div></div>
-
-<div id="tech" class="modal"><div class="modal-box">
-<h2>🏪 Tech Tree</h2>
-<h3 style="color:#3b82f6">Backgrounds</h3>
-<div class="buildings-grid" style="margin-bottom:20px">
-<div class="building" onclick="selectBg(0)">
-<div class="building-icon">🌌</div>
-<div class="building-info">
-<div class="building-header"><span class="building-name">Default Space</span></div>
-<div class="building-desc">Classic dark space theme</div>
-<div class="building-stats"><span class="building-cost">FREE</span></div>
-</div>
-</div>
-<div class="building" onclick="buyBg(1)" id="bg1">
-<div class="building-icon">🌊</div>
-<div class="building-info">
-<div class="building-header"><span class="building-name">Ocean Depths</span></div>
-<div class="building-desc">Deep blue underwater vibes</div>
-<div class="building-stats"><span class="building-cost">$500K</span></div>
-</div>
-</div>
-<div class="building" onclick="buyBg(2)" id="bg2">
-<div class="building-icon">🌅</div>
-<div class="building-info">
-<div class="building-header"><span class="building-name">Sunset Sky</span></div>
-<div class="building-desc">Warm orange and red gradients</div>
-<div class="building-stats"><span class="building-cost">$1M</span></div>
-</div>
-</div>
-<div class="building" onclick="buyBg(3)" id="bg3">
-<div class="building-icon">🌲</div>
-<div class="building-info">
-<div class="building-header"><span class="building-name">Forest Grove</span></div>
-<div class="building-desc">Peaceful green nature</div>
-<div class="building-stats"><span class="building-cost">$2M</span></div>
-</div>
-</div>
-<div class="building" onclick="buyBg(4)" id="bg4">
-<div class="building-icon">💫</div>
-<div class="building-info">
-<div class="building-header"><span class="building-name">Neon City</span></div>
-<div class="building-desc">Cyberpunk pink and purple</div>
-<div class="building-stats"><span class="building-cost">$5M</span></div>
-</div>
-</div>
-</div>
-
-<h3 style="color:#22c55e">Buildings</h3>
-<div id="buildingsContainer" class="buildings-grid"></div>
-<h3 style="color:#8b5cf6">Upgrades</h3>
-<div id="upgradesContainer" class="upgrades-container"></div>
-<button class="close" onclick="closeModal('tech')">Close</button>
-</div></div>
-
-<div id="stats" class="modal"><div class="modal-box">
-<h2>📊 Stats</h2>
-<div id="statsContent"></div>
-<button class="close" onclick="closeModal('stats')">Close</button>
-</div></div>
-
-<div id="tooltip" class="tooltip">
-<div class="tooltip-title"></div>
-<div class="tooltip-desc"></div>
-<div class="tooltip-cost"></div>
-</div>
+<section id="judge">
+  <h2>Group Scoring</h2>
+  <p class="hint">Edit each group's name and prompt, then rate each group from 0 to 10. Scores save automatically on this device.</p>
+  <div id="groups"></div>
+  <h2>Leaderboard</h2>
+  <div class="card"><table id="board"></table></div>
+  <button class="reset" id="reset">Reset all scores</button>
+</section>
 
 <script>
-/* ---------- Data & State ---------- */
-const choices=['rock','paper','scissors']
-const displaySets=[
-  {rock:'✊',paper:'✋',scissors:'✌️'},
-  {rock:'Rock',paper:'Paper',scissors:'Scissors'},
-  {rock:'🪨',paper:'📄',scissors:'✂️'}
-]
+const CRITERIA = ["Creativity", "Teamwork", "Stage presence", "Skill", "Entertainment"];
+const PROMPTS = ["Dance", "Comedy", "Singing", "Magic", "Acting"];
+const KEY = "talentBuzzerV1";
 
-const buildings=[
-  {id:'bot',name:'Practice Bot',icon:'🤖',baseCost:15,desc:'Plays 1 game per second',isBot:true,speed:1},
-  {id:'grandma',name:'Street Hustler',icon:'👵',baseCost:100,desc:'Plays 5 games per second',isBot:true,speed:5},
-  {id:'coin',name:'Lucky Coin',icon:'🪙',baseCost:500,desc:'Adds 2% win chance',isLuck:true,luck:2},
-  {id:'farm',name:'Training Dojo',icon:'🥋',baseCost:1100,desc:'Plays 8 games per second',isBot:true,speed:8},
-  {id:'collector',name:'Auto Collector',icon:'💎',baseCost:1000,desc:'Auto cashes out at +5 streak per owned',isCollector:true,threshold:5},
-  {id:'mine',name:'Casino Floor',icon:'🎰',baseCost:12000,desc:'Plays 47 games per second',isBot:true,speed:47},
-  {id:'foot',name:'Rabbit Foot',icon:'🐾',baseCost:20000,desc:'Adds 5% win chance',isLuck:true,luck:5},
-  {id:'factory',name:'Bot Swarm',icon:'🏭',baseCost:130000,desc:'Plays 260 games per second',isBot:true,speed:260},
-  {id:'clover',name:'Four-Leaf Clover',icon:'🍀',baseCost:2000000,desc:'Adds 10% win chance',isLuck:true,luck:10},
-]
-
-const upgrades=[
-  {id:'streak1',name:'Streak Saver',icon:'🛡️',cost:1000,desc:'First loss doesn\'t reset streak',effect:{streakProtect:1}},
-  {id:'streak2',name:'Double Streak',icon:'⚡',cost:50000,desc:'Earn 2 streak per win',requires:{streak1:true},effect:{streakMult:2}},
-  {id:'streak3',name:'Triple Threat',icon:'💥',cost:500000,desc:'Earn 3 streak per win',requires:{streak2:true},effect:{streakMult:3}},
-  
-  {id:'mult1',name:'Better Math',icon:'📐',cost:5000,desc:'Multiplier formula improved +10%',effect:{multBoost:1.1}},
-  {id:'mult2',name:'Advanced Calculus',icon:'📊',cost:50000,desc:'Multiplier formula improved +20%',requires:{mult1:true},effect:{multBoost:1.2}},
-  {id:'mult3',name:'Quantum Math',icon:'🔬',cost:500000,desc:'Multiplier formula improved +30%',requires:{mult2:true},effect:{multBoost:1.3}},
-  
-  {id:'cash1',name:'Bigger Wallet',icon:'💰',cost:5000,desc:'Cashout value +50%',effect:{cashBoost:1.5}},
-  {id:'cash2',name:'Vault',icon:'🏦',cost:100000,desc:'Cashout value +100%',requires:{cash1:true},effect:{cashBoost:2}},
-  {id:'cash3',name:'Bank Empire',icon:'🏛️',cost:1000000,desc:'Cashout value +150%',requires:{cash2:true},effect:{cashBoost:2.5}},
-  
-  {id:'synergy1',name:'Beginner\'s Luck',icon:'🍀',cost:7777,desc:'All bots +10% efficiency',effect:{allBots:1.1}},
-  {id:'synergy2',name:'Team Spirit',icon:'🤝',cost:77777,desc:'All bots +20% efficiency',requires:{synergy1:true},effect:{allBots:1.2}},
-  {id:'synergy3',name:'Perfect Harmony',icon:'☯️',cost:777777,desc:'All bots +50% efficiency',requires:{synergy2:true},effect:{allBots:1.5}},
-  
-  {id:'auto1',name:'Faster Bots',icon:'⚡',cost:10000,desc:'All bots play 10% faster',effect:{speedBoost:1.1}},
-  {id:'auto2',name:'Turbo Mode',icon:'🚀',cost:250000,desc:'All bots play 25% faster',requires:{auto1:true},effect:{speedBoost:1.25}},
-  {id:'auto3',name:'Hyperspeed',icon:'💨',cost:5000000,desc:'All bots play 50% faster',requires:{auto2:true},effect:{speedBoost:1.5}},
-  
-  {id:'laser',name:'Laser Beam',icon:'🔴',cost:100000,desc:'Epic laser effects on wins!',effect:{hasLaser:true}},
-]
-
-const petTypes=[
-  {id:0,emoji:'🐕',name:'Dog'},
-  {id:1,emoji:'🐈',name:'Cat'},
-  {id:2,emoji:'🐉',name:'Dragon'},
-  {id:3,emoji:'🦄',name:'Unicorn'},
-  {id:4,emoji:'🦊',name:'Fox'},
-  {id:5,emoji:'🐼',name:'Panda'},
-  {id:6,emoji:'🦁',name:'Lion'},
-  {id:7,emoji:'🐯',name:'Tiger'},
-  {id:8,emoji:'🦅',name:'Eagle'},
-  {id:9,emoji:'🐺',name:'Wolf'},
-]
-
-const backgrounds=[
-  {id:0,name:'Default Space',class:'bg-space'},
-  {id:1,name:'Ocean Depths',class:'bg-ocean',cost:500000},
-  {id:2,name:'Sunset Sky',class:'bg-sunset',cost:1000000},
-  {id:3,name:'Forest Grove',class:'bg-forest',cost:2000000},
-  {id:4,name:'Neon City',class:'bg-neon',cost:5000000},
-]
-
-let mode=+localStorage.getItem('mode')||0
-let money=+localStorage.getItem('money')||0
-let streak=0
-let streakProtectCharges=+localStorage.getItem('streakProtectCharges')||0
-let owned=JSON.parse(localStorage.getItem('owned'))||{}
-let boughtUpgrades=JSON.parse(localStorage.getItem('upgrades'))||{}
-let stats=JSON.parse(localStorage.getItem('stats'))||{best:0,earned:0,clicks:0}
-let rebirths=+localStorage.getItem('rebirths')||0
-let pets=JSON.parse(localStorage.getItem('pets'))||[]        // unlocked pets (by rebirth)
-let equippedPetIndex=+localStorage.getItem('equippedPet')||-1 // -1 = none
-let currentBg=+localStorage.getItem('currentBg')||0
-let autoCollectEnabled=localStorage.getItem('autoCollect')!=='false'
-let ownedBackgrounds=JSON.parse(localStorage.getItem('ownedBg'))||[0]
-
-buildings.forEach(b=>owned[b.id]=owned[b.id]||0)
-
-/* ---------- Core Gameplay ---------- */
-function multiplier(){
-  let base=1+Math.pow(streak,1.4)/10
-  Object.keys(boughtUpgrades).forEach(upId=>{
-    const up=upgrades.find(u=>u.id===upId)
-    if(up&&up.effect&&up.effect.multBoost){
-      base*=up.effect.multBoost
-    }
-  })
-  return base
+function fresh() {
+  return PROMPTS.map((p, i) => ({ name: "Group " + (i + 1), prompt: p, scores: CRITERIA.map(() => 0) }));
 }
+let data;
+try { data = JSON.parse(localStorage.getItem(KEY)); } catch (e) {}
+if (!Array.isArray(data) || data.length !== 5) data = fresh();
+function save() { try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) {} }
 
-function payout(){
-  let base=Math.floor(streak*20*multiplier())
-  Object.keys(boughtUpgrades).forEach(upId=>{
-    const up=upgrades.find(u=>u.id===upId)
-    if(up&&up.effect&&up.effect.cashBoost){
-      base*=up.effect.cashBoost
-    }
-  })
-  return Math.floor(base)
+/* Tabs */
+function show(which) {
+  document.getElementById("buzz").classList.toggle("active", which === "buzz");
+  document.getElementById("judge").classList.toggle("active", which === "judge");
+  document.getElementById("tabBuzz").classList.toggle("active", which === "buzz");
+  document.getElementById("tabJudge").classList.toggle("active", which === "judge");
 }
+document.getElementById("tabBuzz").onclick = () => show("buzz");
+document.getElementById("tabJudge").onclick = () => show("judge");
 
-function calcPlaysPerSecond(){
-  let total=0
-  let allBotsMultiplier=1
-  let speedBoost=1
-  
-  Object.keys(boughtUpgrades).forEach(upId=>{
-    const up=upgrades.find(u=>u.id===upId)
-    if(up&&up.effect&&up.effect.allBots){
-      allBotsMultiplier*=up.effect.allBots
-    }
-    if(up&&up.effect&&up.effect.speedBoost){
-      speedBoost*=up.effect.speedBoost
-    }
-  })
-  
-  const rebirthBonus=1+(rebirths*0.1)
-  
-  buildings.forEach(b=>{
-    if(!b.isBot)return
-    total+=(b.speed||1)*owned[b.id]*allBotsMultiplier*speedBoost*rebirthBonus
-  })
-  return total
+/* Buzzer sound */
+let ctx;
+function buzz() {
+  const flash = document.getElementById("flash");
+  flash.classList.remove("on"); void flash.offsetWidth; flash.classList.add("on");
+  try {
+    ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+    if (ctx.state === "suspended") ctx.resume();
+    const t = ctx.currentTime, g = ctx.createGain();
+    g.gain.setValueAtTime(0.5, t);
+    g.gain.setValueAtTime(0.5, t + 0.9);
+    g.gain.exponentialRampToValueAtTime(0.001, t + 1.1);
+    g.connect(ctx.destination);
+    [110, 116, 220].forEach(f => {
+      const o = ctx.createOscillator();
+      o.type = "sawtooth"; o.frequency.value = f;
+      o.connect(g); o.start(t); o.stop(t + 1.1);
+    });
+  } catch (e) {}
+  if (navigator.vibrate) navigator.vibrate(200);
 }
-
-function calcLuck(){
-  let total=0
-  buildings.forEach(b=>{
-    if(b.isLuck){
-      total+=(b.luck||0)*owned[b.id]
-    }
-  })
-  return Math.min(total,95)
-}
-
-function getAutoCollectThreshold(){
-  if(!autoCollectEnabled)return 0
-  let total=5*owned['collector']
-  return total
-}
-
-function getCost(b){
-  return Math.floor(b.baseCost*Math.pow(1.15,owned[b.id]))
-}
-
-/* ---------- UI Update & Persistence ---------- */
-function update(){
-  document.getElementById('streak').textContent=streak
-  document.getElementById('mult').textContent='x'+multiplier().toFixed(2)
-  document.getElementById('cash').textContent='$'+formatNum(payout())
-  document.getElementById('pps').textContent=formatNum(calcPlaysPerSecond())+'/s'
-  document.getElementById('luck').textContent=calcLuck()+'%'
-  document.getElementById('shields').textContent=streakProtectCharges
-  document.getElementById('rebirths').textContent=rebirths
-  document.getElementById('petCount').textContent=pets.length
-  
-  const mText=document.getElementById('moneyText')
-  const eqPet=document.getElementById('equippedPet')
-  mText.textContent='$'+formatNum(money)
-  mText.parentElement.classList.add('money-pop')
-  setTimeout(()=>mText.parentElement.classList.remove('money-pop'),220)
-  
-  // equipped pet display
-  if(equippedPetIndex>=0 && pets[equippedPetIndex]){
-    eqPet.textContent = pets[equippedPetIndex].emoji
-  } else {
-    eqPet.textContent = ''
+const b = document.getElementById("buzzer");
+b.addEventListener("pointerdown", buzz);
+document.addEventListener("keydown", e => {
+  if (e.code === "Space" && document.getElementById("buzz").classList.contains("active") && !e.repeat) {
+    e.preventDefault(); b.classList.add("down"); buzz();
   }
-  
-  document.getElementById('cashoutBtn').disabled=streak<1
-  
-  for(let i=1;i<=4;i++){
-    const elem=document.getElementById('bg'+i)
-    if(elem){
-      if(ownedBackgrounds.includes(i)){
-        elem.classList.remove('disabled')
-      }else{
-        elem.classList.add('disabled')
-      }
-    }
-  }
+});
+document.addEventListener("keyup", e => { if (e.code === "Space") b.classList.remove("down"); });
 
-  // render buildings & upgrades & pets & stats UI
-  renderBuildings()
-  renderUpgrades()
-  renderPets()
-  renderStatsContent()
+/* Judging */
+const total = g => g.scores.reduce((a, c) => a + c, 0);
+const max = CRITERIA.length * 10;
 
-  // persistence
-  localStorage.setItem('money',money)
-  localStorage.setItem('owned',JSON.stringify(owned))
-  localStorage.setItem('upgrades',JSON.stringify(boughtUpgrades))
-  localStorage.setItem('pets',JSON.stringify(pets))
-  localStorage.setItem('equippedPet',equippedPetIndex)
-  localStorage.setItem('currentBg',currentBg)
-  localStorage.setItem('ownedBg',JSON.stringify(ownedBackgrounds))
-  localStorage.setItem('streakProtectCharges',streakProtectCharges)
-  localStorage.setItem('rebirths',rebirths)
-  localStorage.setItem('stats',JSON.stringify(stats))
+function renderBoard() {
+  const rows = data.map((g, i) => ({ g, i })).sort((a, c) => total(c.g) - total(a.g));
+  document.getElementById("board").innerHTML =
+    "<tr><th>#</th><th>Group</th><th>Prompt</th>" + CRITERIA.map(c => "<th>" + c.split(" ")[0] + "</th>").join("") + "<th>Total</th></tr>" +
+    rows.map((r, k) => "<tr><td>" + (k + 1) + "</td><td>" + esc(r.g.name) + "</td><td>" + esc(r.g.prompt) + "</td>" +
+      r.g.scores.map(s => "<td>" + s + "</td>").join("") + "<td class='r'>" + total(r.g) + "/" + max + "</td></tr>").join("");
 }
+function esc(s) { return s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
 
-/* ---------- Helpers ---------- */
-function formatNum(n){
-  if(n>=1e9)return(n/1e9).toFixed(2)+'B'
-  if(n>=1e6)return(n/1e6).toFixed(2)+'M'
-  if(n>=1e3)return(n/1e3).toFixed(1)+'K'
-  return Math.floor(n)
+function renderGroups() {
+  const root = document.getElementById("groups");
+  root.innerHTML = "";
+  data.forEach((g, i) => {
+    const el = document.createElement("div");
+    el.className = "card";
+    el.innerHTML =
+      "<h3><span class='n'>" + (i + 1) + "</span>Group " + (i + 1) + "</h3>" +
+      "<div class='names'><div><label>Group name</label><input type='text' data-f='name' value=\"" + esc(g.name) + "\"></div>" +
+      "<div><label>Prompt</label><input type='text' data-f='prompt' value=\"" + esc(g.prompt) + "\"></div></div>" +
+      CRITERIA.map((c, k) => "<div class='crit'><span>" + c + "</span><input type='range' min='0' max='10' step='1' data-k='" + k + "' value='" + g.scores[k] + "'><output>" + g.scores[k] + "</output></div>").join("") +
+      "<div class='total'>Total <b>" + total(g) + "</b> / " + max + "</div>";
+    el.querySelectorAll("input[type=text]").forEach(inp => inp.oninput = () => { g[inp.dataset.f] = inp.value; save(); renderBoard(); });
+    el.querySelectorAll("input[type=range]").forEach(inp => inp.oninput = () => {
+      g.scores[+inp.dataset.k] = +inp.value;
+      inp.nextElementSibling.textContent = inp.value;
+      el.querySelector(".total b").textContent = total(g);
+      save(); renderBoard();
+    });
+    root.appendChild(el);
+  });
 }
-
-function roll(final){
-  const elem=document.getElementById('computerChoice')
-  let i=0
-  const frames=['✊','✋','✌️']
-  const interval=setInterval(()=>{
-    elem.textContent=frames[i++%3]
-  },80)
-  setTimeout(()=>{
-    clearInterval(interval)
-    elem.textContent=final
-  },600)
-}
-
-/* ---------- Game Processing ---------- */
-function processGame(player,isBot){
-  const comp=choices[Math.floor(Math.random()*3)]
-  
-  if(player===comp){
-    return comp
-  }
-  
-  let win=
-    (player==='rock'&&comp==='paper')||
-    (player==='paper'&&comp==='scissors')||
-    (player==='scissors'&&comp==='rock')
-
-  if(!win){
-    const luckChance=calcLuck()
-    if(Math.random()*100<luckChance){
-      win=true
-      if(!isBot)spawnParticle('🍀 LUCKY!')
-    }
-  }
-
-  if(win){
-    let streakGain=1
-    Object.keys(boughtUpgrades).forEach(upId=>{
-      const up=upgrades.find(u=>u.id===upId)
-      if(up&&up.effect&&up.effect.streakMult){
-        streakGain=up.effect.streakMult
-      }
-    })
-    
-    streak+=streakGain
-    if(!isBot){
-      stats.clicks++
-      if(streakGain>1){
-        spawnParticle(`+${streakGain} STREAK!`)
-      }
-      // small satisfying feedback on manual plays
-      flashChoice()
-    }
-  }else{
-    if(streakProtectCharges>0){
-      streakProtectCharges--
-      if(!isBot)spawnParticle('🛡️ PROTECTED!')
-    }else{
-      streak=0
-    }
-  }
-
-  stats.best=Math.max(stats.best,streak)
-  
-  const threshold=getAutoCollectThreshold()
-  if(threshold>0&&streak>=threshold){
-    cashOut(true)
-  }
-  
-  return comp
-}
-
-/* ---------- Player actions ---------- */
-function guess(player){
-  const comp=processGame(player,false)
-  roll(displaySets[mode][comp])
-  
-  if(boughtUpgrades['laser'] && typeof spawnLaser === 'function'){
-    spawnLaser()
-  }
-  update()
-}
-
-function quickPlay(){
-  const players=['rock','paper','scissors']
-  const pick=players[Math.floor(Math.random()*3)]
-  guess(pick)
-}
-
-/* ---------- Cashout: improved feedback ---------- */
-function cashOut(isAuto=false){
-  if(streak<1) return
-  let amount=payout()
-  // rebirth bonus
-  amount = Math.floor(amount * (1 + rebirths * 0.1))
-  const gained = amount
-  // animate incrementing money (satisfying tick)
-  const start = money
-  const steps = Math.min(35, Math.max(6, Math.floor(gained/Math.max(1,1000))))
-  let step = 0
-  const inc = Math.ceil(gained/steps)
-  const tick = setInterval(()=>{
-    step++
-    const add = (step<steps) ? inc : (gained - (inc*(steps-1)))
-    money += add
-    spawnCoinBurst(6)
-    update()
-    if(step>=steps){
-      clearInterval(tick)
-      finalizeCashout(gained, isAuto)
-    }
-  }, 40)
-  // reset streak and play sound etc handled in finalizeCashout
-}
-
-function finalizeCashout(gained, isAuto){
-  stats.earned += gained
-  spawnParticle(`+$${formatNum(gained)}`)
-  playChime()
-  // pet reaction
-  if(equippedPetIndex>=0 && pets[equippedPetIndex]){
-    petCelebrate()
-  }
-  streak = 0
-  update()
-}
-
-/* ---------- Backgrounds ---------- */
-function selectBg(id){
-  if(!ownedBackgrounds.includes(id)) return
-  const main=document.getElementById('mainContainer')
-  backgrounds.forEach(b=>main.classList.remove(b.class))
-  const bg = backgrounds.find(b=>b.id===id)
-  if(bg && bg.class) main.classList.add(bg.class)
-  currentBg=id
-  localStorage.setItem('currentBg',currentBg)
-}
-
-function buyBg(id){
-  const bg = backgrounds.find(b=>b.id===id)
-  if(!bg) return
-  if(ownedBackgrounds.includes(id)) return selectBg(id)
-  if(money >= bg.cost){
-    money -= bg.cost
-    ownedBackgrounds.push(id)
-    selectBg(id)
-    spawnParticle('🎉 BACKGROUND!')
-    update()
-  }else{
-    spawnParticle('❌ Not enough money')
-  }
-}
-
-/* ---------- Buildings & Upgrades ---------- */
-function buyBuilding(id){
-  const b = buildings.find(x=>x.id===id)
-  if(!b) return
-  const cost = getCost(b)
-  if(money >= cost){
-    money -= cost
-    owned[id] = (owned[id]||0) + 1
-    spawnParticle(`+1 ${b.name}`)
-    update()
-  }else{
-    spawnParticle('❌ Not enough money')
-  }
-}
-
-function buyUpgrade(id){
-  const up = upgrades.find(u=>u.id===id)
-  if(!up) return
-  if(boughtUpgrades[id]) return
-  // check requirements
-  if(up.requires){
-    for(const req in up.requires){
-      if(!boughtUpgrades[req]) {
-        spawnParticle('❌ Requires other upgrade')
-        return
-      }
-    }
-  }
-  if(money >= up.cost){
-    money -= up.cost
-    boughtUpgrades[id] = true
-    // apply immediate effects (streak protect)
-    if(up.effect && up.effect.streakProtect){
-      streakProtectCharges += up.effect.streakProtect
-    }
-    spawnParticle('⚙️ Upgrade!')
-    update()
-  }else{
-    spawnParticle('❌ Not enough money')
-  }
-}
-
-/* ---------- Render helpers ---------- */
-function renderBuildings(){
-  const container=document.getElementById('buildingsContainer')
-  if(!container) return
-  container.innerHTML=''
-  buildings.forEach(b=>{
-    const div=document.createElement('div')
-    div.className='building' + ((getCost(b) > money) ? ' disabled' : '')
-    div.onclick=()=>{ if(getCost(b) <= money) buyBuilding(b.id) }
-    div.innerHTML=`
-      <div class="building-icon">${b.icon}</div>
-      <div class="building-info">
-        <div class="building-header"><span class="building-name">${b.name}</span><span class="building-owned">${owned[b.id]||0}</span></div>
-        <div class="building-desc">${b.desc}</div>
-        <div class="building-stats"><span class="building-cost">$${formatNum(getCost(b))}</span><span class="building-production">${b.isBot? (b.speed+' p/s') : (b.isLuck? ('+'+b.luck+'% luck') : '')}</span></div>
-      </div>
-    `
-    container.appendChild(div)
-  })
-}
-
-function renderUpgrades(){
-  const container=document.getElementById('upgradesContainer')
-  if(!container) return
-  container.innerHTML=''
-  upgrades.forEach(u=>{
-    const purchased = !!boughtUpgrades[u.id]
-    const meetsReq = !u.requires || Object.keys(u.requires).every(r=>boughtUpgrades[r])
-    const disabled = (!meetsReq) || (!purchased && money < u.cost)
-    const div=document.createElement('div')
-    div.className='upgrade' + (disabled? ' disabled':'') + (purchased? ' purchased':'')
-    div.onclick=()=>{ if(!purchased && meetsReq) buyUpgrade(u.id) }
-    div.innerHTML=`
-      <div class="upgrade-icon">${u.icon}</div>
-      <div style="font-weight:800;margin-bottom:6px">${u.name}</div>
-      <div class="upgrade-cost">$${formatNum(u.cost)}</div>
-    `
-    div.onmouseenter=(e)=>{
-      showTooltip(e, u.name, u.desc, '$'+formatNum(u.cost))
-    }
-    div.onmouseleave=hideTooltip
-    container.appendChild(div)
-  })
-}
-
-/* ---------- Pets UI & logic ---------- */
-function renderPets(){
-  const container=document.getElementById('petsContainer')
-  if(!container) return
-  container.innerHTML=''
-  // Owned pets (from pets array). Show equip/select
-  pets.forEach((p, idx)=>{
-    const div=document.createElement('div')
-    div.style.background='#0f172a'
-    div.style.border='1px solid #1e293b'
-    div.style.borderRadius='12px'
-    div.style.padding='10px'
-    div.style.display='flex'
-    div.style.alignItems='center'
-    div.style.justifyContent='space-between'
-    div.innerHTML = `<div style="display:flex;gap:10px;align-items:center"><div style="font-size:28px">${p.emoji}</div><div style="font-weight:800">${p.name}</div></div><div><button style="padding:8px 10px;border-radius:8px;border:none;background:${equippedPetIndex===idx?'#10b981':'#3b82f6'};color:white;cursor:pointer" onclick="equipPet(${idx})">${equippedPetIndex===idx?'Equipped':'Equip'}</button></div>`
-    container.appendChild(div)
-  })
-  if(pets.length===0){
-    container.innerHTML='<div style="color:#94a3b8">No pets unlocked yet. Get a rebirth to unlock one!</div>'
-  }
-}
-
-function equipPet(index){
-  if(!pets[index]) return
-  equippedPetIndex = index
-  // small pulse feedback
-  const eqEl = document.getElementById('equippedPet')
-  eqEl.classList.add('equippedPulse')
-  setTimeout(()=>eqEl.classList.remove('equippedPulse'),900)
-  update()
-}
-
-/* ---------- Stats panel ---------- */
-function renderStatsContent(){
-  const c=document.getElementById('statsContent')
-  if(!c) return
-  c.innerHTML=`
-    <div style="display:grid;gap:8px">
-      <div>Best Streak: ${stats.best}</div>
-      <div>Total Earned: $${formatNum(stats.earned)}</div>
-      <div>Clicks: ${stats.clicks}</div>
-      <div>Rebirths: ${rebirths}</div>
-      <div>Pets: ${pets.map(p=>p.emoji).join(' ')}</div>
-    </div>
-  `
-  document.getElementById('rebirthBonus').textContent = rebirths*10
-  document.getElementById('rebirthReq').textContent = formatNum(1000000 * Math.pow(2, rebirths))
-}
-
-/* ---------- Visual & Audio Flourish ---------- */
-function spawnParticle(txt){
-  const el=document.createElement('div')
-  el.className='particle'
-  el.style.left=(window.innerWidth/2 + (Math.random()*200-100))+'px'
-  el.style.top=(window.innerHeight/2 + (Math.random()*80-40))+'px'
-  el.textContent=txt
-  document.body.appendChild(el)
-  setTimeout(()=>el.remove(),1100)
-}
-
-function spawnCoinBurst(count){
-  for(let i=0;i<count;i++){
-    const el=document.createElement('div')
-    el.className='coin-particle'
-    el.textContent = '🪙'
-    el.style.left = (window.innerWidth/2 + (Math.random()*220 - 110)) + 'px'
-    el.style.top = (window.innerHeight/2 + (Math.random()*120 - 60)) + 'px'
-    el.style.transform = `rotate(${Math.random()*360}deg)`
-    document.body.appendChild(el)
-    setTimeout(()=>el.remove(),900)
-  }
-}
-
-function spawnPet(){
-  if(pets.length===0) return
-  const p = pets[Math.min(pets.length-1, pets.length-1)]
-  const el=document.createElement('div')
-  el.className='pet'
-  el.textContent=p.emoji
-  el.style.left=(20 + Math.random()*60)+'px'
-  el.style.bottom='80px'
-  document.body.appendChild(el)
-  setTimeout(()=>el.remove(),2000)
-}
-
-function petCelebrate(){
-  // small pet burst from money display
-  const eq = document.getElementById('equippedPet')
-  if(!eq || !eq.textContent) return
-  for(let i=0;i<8;i++){
-    setTimeout(()=>spawnParticle(eq.textContent+' ✨'), i*90)
-  }
-  // small bounce
-  eq.style.transform = 'translateY(-8px)'
-  setTimeout(()=>eq.style.transform = '', 600)
-}
-
-function spawnLaser(){
-  const el=document.createElement('div')
-  el.className='laser'
-  el.style.left=(window.innerWidth/2)+'px'
-  const targetX = window.innerWidth/2 + (Math.random()*300 - 150)
-  const length = Math.abs(targetX - window.innerWidth/2)
-  el.style.setProperty('--laser-length', length+'px')
-  el.style.top=(window.innerHeight/2 + (Math.random()*120-60))+'px'
-  document.body.appendChild(el)
-  setTimeout(()=>el.remove(),420)
-}
-
-function flashChoice(){
-  const el = document.getElementById('computerChoice')
-  el.style.transform = 'scale(1.08)'
-  setTimeout(()=>el.style.transform = '', 160)
-}
-
-/* WebAudio chime (no external assets) */
-let audioCtx = null
-function playChime(){
-  try{
-    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)()
-    const o = audioCtx.createOscillator()
-    const g = audioCtx.createGain()
-    o.type = 'sine'
-    const now = audioCtx.currentTime
-    o.frequency.setValueAtTime(700, now)
-    o.frequency.exponentialRampToValueAtTime(300, now+0.25)
-    g.gain.setValueAtTime(0.001, now)
-    g.gain.exponentialRampToValueAtTime(0.18, now+0.02)
-    g.gain.exponentialRampToValueAtTime(0.0001, now+0.6)
-    o.connect(g); g.connect(audioCtx.destination)
-    o.start(now); o.stop(now+0.65)
-  }catch(e){
-    // ignore in environments where audio is blocked
-    console.warn('audio error', e)
-  }
-}
-
-/* ---------- Rebirth & Pets Unlock ---------- */
-function doRebirth(){
-  const req = +document.getElementById('rebirthReq').textContent || 1000000
-  if(money < req){
-    spawnParticle('❌ Not enough money to rebirth')
-    return
-  }
-  // On rebirth, give next pet (if available) and increment rebirth count & reset progress
-  rebirths += 1
-  const petIndex = Math.min(rebirths-1, petTypes.length-1)
-  // Avoid duplicate unlocks: only add if not already present by id
-  if(!pets.some(p=>p.id===petTypes[petIndex].id)){
-    pets.push(petTypes[petIndex])
-    // auto-equip first pet if none equipped
-    if(equippedPetIndex < 0) equippedPetIndex = pets.length-1
-  }
-  // reset most progress but keep rebirths and pets/equip
-  money = 0
-  streak = 0
-  streakProtectCharges = 0
-  owned = {}
-  boughtUpgrades = {}
-  stats = {best:stats.best,earned:stats.earned,clicks:0} // preserve best and earned
-  spawnParticle('🔁 Rebirth!')
-  playChime()
-  update()
-  openModal('settings')
-}
-
-/* ---------- Bot Loop ---------- */
-let lastBotTick = Date.now()
-function botTick(){
-  const now = Date.now()
-  const delta = (now - lastBotTick)/1000
-  lastBotTick = now
-  const playsPerSec = calcPlaysPerSecond()
-  const plays = playsPerSec * delta
-  const whole = Math.floor(plays)
-  for(let i=0;i<whole;i++){
-    const players=['rock','paper','scissors']
-    const pick = players[Math.floor(Math.random()*3)]
-    processGame(pick,true)
-  }
-  if(Math.random() < (plays - whole)) {
-    const players=['rock','paper','scissors']
-    const pick = players[Math.floor(Math.random()*3)]
-    processGame(pick,true)
-  }
-  update()
-}
-setInterval(botTick, 1000/2)
-
-/* ---------- Extras ---------- */
-setInterval(()=>{ update() }, 1000)
-
-document.getElementById('autoCollectToggle').checked = autoCollectEnabled
-selectBg(currentBg)
-update()
-
-document.addEventListener('keydown', (e)=>{
-  if(e.key==='1') guess('rock')
-  if(e.key==='2') guess('paper')
-  if(e.key==='3') guess('scissors')
-})
-
-/* ---------- Tooltip ---------- */
-function showTooltip(e, title, desc, cost){
-  const tip=document.getElementById('tooltip')
-  tip.querySelector('.tooltip-title').textContent=title
-  tip.querySelector('.tooltip-desc').textContent=desc
-  tip.querySelector('.tooltip-cost').textContent=cost
-  tip.style.left=(e.clientX+12)+'px'
-  tip.style.top=(e.clientY+12)+'px'
-  tip.classList.add('show')
-}
-function hideTooltip(){ document.getElementById('tooltip').classList.remove('show') }
-
-/* ---------- Modal ---------- */
-function openModal(id){ document.getElementById(id).style.display='flex' }
-function closeModal(id){ document.getElementById(id).style.display='none' }
-
-/* ---------- Initialization ---------- */
-// ensure owned keys exist
-buildings.forEach(b=>owned[b.id]=owned[b.id]||0)
-// ensure pets array items are objects with id/name/emoji
-pets = pets.map(p => (typeof p.id==='number' ? p : petTypes.find(pt=>pt.id===p.id) || p))
-// ensure equipped index valid
-if(equippedPetIndex >= pets.length) equippedPetIndex = pets.length - 1
-update()
+document.getElementById("reset").onclick = () => {
+  if (confirm("Reset all names, prompts and scores?")) { data = fresh(); save(); renderGroups(); renderBoard(); }
+};
+renderGroups(); renderBoard();
 </script>
 </body>
 </html>
